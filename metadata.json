@@ -1,0 +1,6 @@
+{
+  "name": "Vanessa Becegatto — Estrutura Autônoma",
+  "description": "Plataforma profissional de orientação, acompanhamento e gestão da jornada de habilitação com atendimento humano e gestão digital.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
