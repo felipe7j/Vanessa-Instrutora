@@ -44,6 +44,8 @@ import {
   RECIBOS_INICIAIS,
   VEICULOS_INICIAIS
 } from '../data/initialData';
+import { supabaseService } from './supabaseService';
+import { isSupabaseConfigured } from './supabaseClient';
 
 interface ConflictCheckResult {
   hasConflict: boolean;
@@ -110,6 +112,8 @@ interface AppStoreContextType {
   auditoria: RegistroAuditoria[];
   addLogAuditoria: (acao: string, entidade: string, detalhes: string) => void;
   resetToDefaultData: () => void;
+  isSupabaseReady: boolean;
+  syncAllToSupabase: () => Promise<{ success: boolean; message: string; details?: Record<string, number> }>;
 }
 
 const STORAGE_KEY_PREFIX = 'vb_estrutura_';
@@ -154,6 +158,52 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [historicoEnvios, setHistoricoEnviosState] = useState<HistoricoEnvio[]>(() => loadFromStorage('historico_envios', HISTORICO_ENVIOS_INICIAIS));
   const [galeria, setGaleriaState] = useState<FotoGaleria[]>(() => loadFromStorage('galeria', FOTOS_GALERIA_INICIAIS));
   const [auditoria, setAuditoriaState] = useState<RegistroAuditoria[]>(() => loadFromStorage('auditoria', AUDITORIA_INICIAL));
+  const isSupabaseReady = isSupabaseConfigured();
+
+  // Se Supabase estiver configurado, busca dados remotos atualizados em segundo plano
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      const fetchRemote = async () => {
+        try {
+          const [remoteCfg, remoteAlunos, remoteVeics, remoteCts, remoteRecs, remoteGaleria] = await Promise.all([
+            supabaseService.fetchConfiguracoes(),
+            supabaseService.fetchAlunos(),
+            supabaseService.fetchVeiculos(),
+            supabaseService.fetchContratos(),
+            supabaseService.fetchRecibos(),
+            supabaseService.fetchGaleria()
+          ]);
+          if (remoteCfg) {
+            setConfiguracoesState(remoteCfg);
+            saveToStorage('configs', remoteCfg);
+          }
+          if (remoteAlunos && remoteAlunos.length > 0) {
+            setAlunosState(remoteAlunos);
+            saveToStorage('alunos', remoteAlunos);
+          }
+          if (remoteVeics && remoteVeics.length > 0) {
+            setVeiculosState(remoteVeics);
+            saveToStorage('veiculos', remoteVeics);
+          }
+          if (remoteCts && remoteCts.length > 0) {
+            setContratosState(remoteCts);
+            saveToStorage('contratos', remoteCts);
+          }
+          if (remoteRecs && remoteRecs.length > 0) {
+            setRecibosState(remoteRecs);
+            saveToStorage('recibos', remoteRecs);
+          }
+          if (remoteGaleria && remoteGaleria.length > 0) {
+            setGaleriaState(remoteGaleria);
+            saveToStorage('galeria', remoteGaleria);
+          }
+        } catch (err) {
+          console.warn('Conexão inicial com Supabase: operando em modo local com fallback.', err);
+        }
+      };
+      fetchRemote();
+    }
+  }, []);
 
   const setRole = useCallback((newRole: UserRole) => {
     setRoleState(newRole);
@@ -686,6 +736,26 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setAuditoriaState(AUDITORIA_INICIAL);
   }, []);
 
+  const syncAllToSupabase = useCallback(async () => {
+    const res = await supabaseService.syncAllToSupabase({
+      configuracoes,
+      pacotes,
+      etapas,
+      instrutores,
+      veiculos,
+      alunos,
+      interessados,
+      contratos,
+      recibos,
+      modeloContrato,
+      galeria
+    });
+    if (res.success) {
+      addLogAuditoria('SYNC_SUPABASE', 'Banco de Dados', 'Sincronização completa de dados com o Supabase realizada com sucesso.');
+    }
+    return res;
+  }, [configuracoes, pacotes, etapas, instrutores, veiculos, alunos, interessados, contratos, recibos, modeloContrato, galeria, addLogAuditoria]);
+
   const value = useMemo(
     () => ({
       role,
@@ -738,7 +808,9 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       removeFotoGaleria,
       auditoria,
       addLogAuditoria,
-      resetToDefaultData
+      resetToDefaultData,
+      isSupabaseReady,
+      syncAllToSupabase
     }),
     [
       role,
@@ -791,7 +863,9 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       removeFotoGaleria,
       auditoria,
       addLogAuditoria,
-      resetToDefaultData
+      resetToDefaultData,
+      isSupabaseReady,
+      syncAllToSupabase
     ]
   );
 

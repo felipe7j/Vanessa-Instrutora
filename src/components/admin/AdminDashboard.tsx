@@ -33,10 +33,17 @@ import {
   Upload,
   Trash2,
   Image,
-  FolderOpen
+  FolderOpen,
+  Database,
+  RefreshCw,
+  FileCode,
+  Check,
+  Info
 } from 'lucide-react';
 import { DocumentManagementModule } from '../documents/DocumentManagementModule';
 import { StudentProfileModal } from './StudentProfileModal';
+import { SupabaseSqlModal } from './SupabaseSqlModal';
+import { testSupabaseConnection } from '../../services/supabaseClient';
 import {
   Aluno,
   Aula,
@@ -78,12 +85,21 @@ export const AdminDashboard: React.FC = () => {
     galeria,
     addFotoGaleria,
     removeFotoGaleria,
-    setRole
+    setRole,
+    isSupabaseReady,
+    syncAllToSupabase
   } = useAppStore();
 
   const [activeModule, setActiveModule] = useState<
     'visao_geral' | 'alunos' | 'interessados' | 'agenda' | 'veiculos' | 'documentos' | 'conteudo' | 'evolucao' | 'auditoria' | 'configuracoes'
   >('visao_geral');
+
+  // Supabase states
+  const [showSqlModal, setShowSqlModal] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [connectionResult, setConnectionResult] = useState<{ connected: boolean; message: string } | null>(null);
+  const [syncingSupabase, setSyncingSupabase] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string; details?: Record<string, number> } | null>(null);
 
   // Vehicle Add / Edit state
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
@@ -164,6 +180,22 @@ export const AdminDashboard: React.FC = () => {
   // Lesson cancellation modal state
   const [cancelingLessonId, setCancelingLessonId] = useState<string | null>(null);
   const [lessonCancelReason, setLessonCancelReason] = useState('');
+
+  // WhatsApp Lesson Reminder modal state (FASE 8)
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderAula, setReminderAula] = useState<Aula | null>(null);
+  const [reminderAluno, setReminderAluno] = useState<Aluno | null>(null);
+  const [reminderMessageText, setReminderMessageText] = useState('');
+
+  const handlePrepareWhatsAppReminder = (aula: Aula) => {
+    const student = alunos.find(a => a.id === aula.alunoId);
+    setReminderAula(aula);
+    setReminderAluno(student || null);
+
+    const initialMsg = `Olá, ${aula.alunoNome}! Tudo bem? Aqui é a Vanessa. Passando para lembrar da sua aula prática de direção agendada para ${aula.data}, às ${aula.horarioInicio}. Se precisar confirmar algum detalhe ou solicitar uma alteração, entre em contato comigo por aqui. Até lá!`;
+    setReminderMessageText(initialMsg);
+    setShowReminderModal(true);
+  };
 
   // Gallery photo modal state
   const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
@@ -337,6 +369,22 @@ export const AdminDashboard: React.FC = () => {
     });
 
     setEditingVehicle(null);
+  };
+
+  const handleTestConnection = async () => {
+    setTestingConnection(true);
+    setConnectionResult(null);
+    const res = await testSupabaseConnection();
+    setConnectionResult(res);
+    setTestingConnection(false);
+  };
+
+  const handleSyncSupabase = async () => {
+    setSyncingSupabase(true);
+    setSyncResult(null);
+    const res = await syncAllToSupabase();
+    setSyncResult(res);
+    setSyncingSupabase(false);
   };
 
   return (
@@ -1151,12 +1199,20 @@ export const AdminDashboard: React.FC = () => {
                               {aula.status.toUpperCase()}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right space-x-1.5">
+                          <td className="px-4 py-3 text-right space-x-2">
                             {aula.status === 'agendada' && (
                               <>
                                 <button
+                                  onClick={() => handlePrepareWhatsAppReminder(aula)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer shadow-2xs"
+                                  title="Preparar lembrete no WhatsApp"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>Lembrete WhatsApp</span>
+                                </button>
+                                <button
                                   onClick={() => updateAulaStatus(aula.id, 'realizada')}
-                                  className="text-emerald-700 hover:text-emerald-900 font-bold"
+                                  className="text-emerald-700 hover:text-emerald-900 font-bold cursor-pointer"
                                 >
                                   Concluir
                                 </button>
@@ -2306,6 +2362,171 @@ export const AdminDashboard: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Card 4: Integração com Supabase & Banco de Dados */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+                      <Database className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span>Integração Supabase (PostgreSQL & Migrations)</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Armazenamento relacional, controle de concorrência e sincronização de dados da plataforma.
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+                      isSupabaseReady
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        : 'bg-amber-100 text-amber-900 border border-amber-300'
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isSupabaseReady ? 'bg-emerald-600 animate-pulse' : 'bg-amber-600'
+                      }`}
+                    />
+                    <span>{isSupabaseReady ? 'Conectado ao Supabase' : 'Modo Local (Configuração Pendente)'}</span>
+                  </span>
+                </div>
+
+                {/* Status Box & Variables explanation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <span className="font-bold text-slate-700 block uppercase tracking-wider text-[10px]">
+                      Variáveis de Ambiente Necessárias
+                    </span>
+                    <div className="space-y-1.5 font-mono text-[11px] text-slate-600">
+                      <div className="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
+                        <span>VITE_SUPABASE_URL</span>
+                        <span className="text-[10px] font-sans font-bold text-slate-500">
+                          {isSupabaseReady ? 'Configurado' : 'Aguardando'}
+                        </span>
+                      </div>
+                      <div className="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
+                        <span>VITE_SUPABASE_ANON_KEY</span>
+                        <span className="text-[10px] font-sans font-bold text-slate-500">
+                          {isSupabaseReady ? 'Configurado' : 'Aguardando'}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Defina essas chaves no arquivo <code className="text-slate-600 font-bold">.env</code> para sincronização instantânea em nuvem.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                    <span className="font-bold text-slate-700 block uppercase tracking-wider text-[10px]">
+                      Tabelas e Migrações Geradas
+                    </span>
+                    <div className="text-slate-600 text-xs space-y-1">
+                      <p>✅ <strong>15 Tabelas</strong> mapeadas com chaves, índices e relacionamentos.</p>
+                      <p>✅ <strong>Row Level Security (RLS)</strong> com regras públicas e administrativas.</p>
+                      <p>✅ Gatilhos de auditoria e atualização de data.</p>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Arquivos em <code className="text-amber-800 font-mono">supabase/migrations/</code> e <code className="text-amber-800 font-mono">supabase/schema.sql</code>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connection testing & Sync feedback */}
+                {connectionResult && (
+                  <div
+                    className={`p-4 rounded-2xl border text-xs flex items-start gap-2.5 ${
+                      connectionResult.connected
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-rose-50 border-rose-200 text-rose-900'
+                    }`}
+                  >
+                    {connectionResult.connected ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <strong>{connectionResult.connected ? 'Sucesso na Conexão:' : 'Atenção na Conexão:'}</strong>
+                      <p className="mt-0.5">{connectionResult.message}</p>
+                    </div>
+                  </div>
+                )}
+
+                {syncResult && (
+                  <div
+                    className={`p-4 rounded-2xl border text-xs flex items-start gap-2.5 ${
+                      syncResult.success
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-rose-50 border-rose-200 text-rose-900'
+                    }`}
+                  >
+                    {syncResult.success ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <strong>{syncResult.message}</strong>
+                      {syncResult.details && (
+                        <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+                          <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded font-semibold text-emerald-800">
+                            Veículos: {syncResult.details.veiculos}
+                          </span>
+                          <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded font-semibold text-emerald-800">
+                            Alunos: {syncResult.details.alunos}
+                          </span>
+                          <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded font-semibold text-emerald-800">
+                            Contratos: {syncResult.details.contratos}
+                          </span>
+                          <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded font-semibold text-emerald-800">
+                            Recibos: {syncResult.details.recibos}
+                          </span>
+                          <span className="px-2 py-0.5 bg-white border border-emerald-200 rounded font-semibold text-emerald-800">
+                            Galeria: {syncResult.details.galeria}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleTestConnection}
+                    disabled={testingConnection}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs cursor-pointer transition shadow-xs disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${testingConnection ? 'animate-spin' : ''}`} />
+                    <span>{testingConnection ? 'Testando Conexão...' : 'Testar Conexão com Supabase'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSyncSupabase}
+                    disabled={syncingSupabase}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs cursor-pointer transition shadow-xs disabled:opacity-50"
+                  >
+                    <Database className={`w-3.5 h-3.5 ${syncingSupabase ? 'animate-pulse' : ''}`} />
+                    <span>{syncingSupabase ? 'Sincronizando Banco...' : 'Sincronizar Dados Locais para o Supabase'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowSqlModal(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer transition shadow-xs"
+                  >
+                    <FileCode className="w-3.5 h-3.5" />
+                    <span>Ver / Copiar Migrations SQL</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </main>
@@ -2536,6 +2757,117 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL: PREPARAR LEMBRETE DE AULA NO WHATSAPP (FASE 8) */}
+      {showReminderModal && reminderAula && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-slate-900">
+                    Preparar Lembrete no WhatsApp
+                  </h4>
+                  <span className="text-[11px] text-slate-500">
+                    Aula com {reminderAula.alunoNome} ({reminderAula.data})
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowReminderModal(false)}
+                className="text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Details preview card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-slate-700">
+                <div>
+                  <span className="text-slate-400 block text-[11px]">Aluno:</span>
+                  <span className="font-bold text-slate-900">{reminderAula.alunoNome}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">Telefone Cadastrado:</span>
+                  <span className="font-bold text-slate-900">
+                    {reminderAluno?.telefone || 'Telefone não localizado'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">Data da Aula:</span>
+                  <span className="font-bold text-slate-900">{reminderAula.data}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">Horário Agendado:</span>
+                  <span className="font-bold text-slate-900">
+                    {reminderAula.horarioInicio} às {reminderAula.horarioFim}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Editable message textarea */}
+            <div className="space-y-1.5 text-xs">
+              <label className="block font-bold text-slate-700">
+                Mensagem a ser Enviada (editável):
+              </label>
+              <textarea
+                rows={5}
+                value={reminderMessageText}
+                onChange={e => setReminderMessageText(e.target.value)}
+                className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white text-xs leading-relaxed text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
+
+            {/* Safety & Transparency note */}
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+              <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                Ao clicar em "Abrir no WhatsApp", a conversa será iniciada com o contato e o texto preenchido para sua revisão final. O sistema não dispara mensagens automáticas sem sua confirmação manual.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowReminderModal(false)}
+                className="px-4 py-2 text-slate-600 font-semibold cursor-pointer text-xs"
+              >
+                Cancelar
+              </button>
+
+              {reminderAluno?.telefone ? (
+                <a
+                  href={`https://wa.me/55${reminderAluno.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(reminderMessageText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setShowReminderModal(false)}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-2 shadow-xs"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Abrir WhatsApp com Mensagem</span>
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="px-5 py-2.5 bg-slate-200 text-slate-500 font-bold rounded-xl text-xs cursor-not-allowed"
+                >
+                  Telefone Inválido
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Supabase SQL Migrations */}
+      <SupabaseSqlModal isOpen={showSqlModal} onClose={() => setShowSqlModal(false)} />
     </div>
   );
 };

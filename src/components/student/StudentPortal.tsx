@@ -23,11 +23,15 @@ import {
   HelpCircle,
   FileCheck2,
   RefreshCw,
-  Eye
+  Eye,
+  Bike,
+  Printer
 } from 'lucide-react';
-import { StatusAcompanhamento, StatusDocumento, Contrato, Recibo } from '../../types';
+import { StatusAcompanhamento, StatusDocumento, Contrato, Recibo, MaterialEstudo } from '../../types';
 import { ContractViewModal } from '../documents/ContractViewModal';
 import { ReceiptViewModal } from '../documents/ReceiptViewModal';
+import { StudyGuideModal } from './StudyGuideModal';
+import { MATERIAIS_ESTUDO_INICIAIS, LABORATORIOS_TOXICOLOGICOS_INICIAIS } from '../../data/initialData';
 
 export const StudentPortal: React.FC = () => {
   const {
@@ -47,9 +51,13 @@ export const StudentPortal: React.FC = () => {
   } = useAppStore();
 
   const aluno = alunos.find(a => a.id === currentAlunoId) || alunos[0];
-  const [activeTab, setActiveTab] = useState<'jornada' | 'agenda' | 'evolucao' | 'documentos' | 'ajuda'>('jornada');
+  const [activeTab, setActiveTab] = useState<'jornada' | 'agenda' | 'evolucao' | 'documentos' | 'guia' | 'ajuda'>('jornada');
   const [selectedEtapaId, setSelectedEtapaId] = useState<string>(aluno.etapaAtualId || 'etapa-07');
   const [studentNotesInput, setStudentNotesInput] = useState<string>('');
+
+  // Study Guide modal state (Bônus FASE 7)
+  const [showStudyGuideModal, setShowStudyGuideModal] = useState(false);
+  const [selectedStudyGuideId, setSelectedStudyGuideId] = useState('mat-02');
 
   // Contract & Receipt viewer state for student
   const [viewingContract, setViewingContract] = useState<Contrato | null>(null);
@@ -175,6 +183,31 @@ export const StudentPortal: React.FC = () => {
     setStudentNotesInput('');
   };
 
+  const handleToggleTask = (etapaId: string, tarefaId: string) => {
+    const currentCompleted = stageProgress?.tarefasConcluidas || [];
+    const isAlreadyDone = currentCompleted.includes(tarefaId);
+    const newCompleted = isAlreadyDone
+      ? currentCompleted.filter(id => id !== tarefaId)
+      : [...currentCompleted, tarefaId];
+
+    const currentEtapa = etapas.find(e => e.id === etapaId);
+    const totalTasks = currentEtapa?.tarefas?.length || 0;
+    const allDone = totalTasks > 0 && newCompleted.length === totalTasks;
+
+    const newStatus: StatusAcompanhamento = allDone
+      ? 'confirmado_evidencia'
+      : newCompleted.length > 0
+      ? 'em_andamento'
+      : stageProgress?.status || 'em_andamento';
+
+    updateProgressoEtapa(
+      etapaId,
+      newStatus,
+      stageProgress?.notasAluno,
+      allDone ? 'Todas as tarefas desta etapa foram marcadas como concluídas pelo aluno.' : stageProgress?.evidenciaRegistrada
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-20">
       {/* Student Portal Header */}
@@ -290,6 +323,18 @@ export const StudentPortal: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('guia')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer ${
+              activeTab === 'guia'
+                ? 'bg-amber-500 text-slate-950 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Award className="w-4 h-4 text-amber-500" />
+            <span>Bônus: Guia de Estudo</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('ajuda')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'ajuda'
@@ -329,7 +374,7 @@ export const StudentPortal: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
                     Etapas do Processo
                   </h3>
-                  <span className="text-xs text-slate-500">10 etapas oficiais</span>
+                  <span className="text-xs text-slate-500">{etapas.length} etapas oficiais</span>
                 </div>
 
                 <div className="space-y-2">
@@ -404,6 +449,179 @@ export const StudentPortal: React.FC = () => {
                     {activeSelectedStage.descricao}
                   </p>
                 </div>
+
+                {/* Custo Estimado e Referência de Taxa */}
+                {activeSelectedStage.custoEstimado && (
+                  <div className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-2xl flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-amber-950">Custo Estimado na Fonte:</span>
+                      <span className="font-extrabold text-amber-900 bg-amber-100 px-2.5 py-1 rounded-lg">
+                        {activeSelectedStage.custoEstimado}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-amber-800/80 hidden sm:inline">
+                      Valores sujeitos a alteração oficial pelo Detran-SP
+                    </span>
+                  </div>
+                )}
+
+                {/* CHECKLIST DE TAREFAS DA ETAPA */}
+                {activeSelectedStage.tarefas && activeSelectedStage.tarefas.length > 0 && (
+                  <div className="space-y-3 bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4 sm:p-5">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                        <span>Checklist de Tarefas desta Etapa</span>
+                      </h4>
+                      <span className="text-[11px] text-slate-500">
+                        Marque conforme for realizando
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {activeSelectedStage.tarefas.map(tarefa => {
+                        const isDone = stageProgress?.tarefasConcluidas?.includes(tarefa.id);
+                        return (
+                          <label
+                            key={tarefa.id}
+                            className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                              isDone
+                                ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-medium'
+                                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={Boolean(isDone)}
+                              onChange={() => handleToggleTask(activeSelectedStage.id, tarefa.id)}
+                              className="mt-0.5 rounded text-amber-500 focus:ring-amber-500/20 cursor-pointer"
+                            />
+                            <span className="text-xs flex-1">{tarefa.titulo}</span>
+                            {isDone && (
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase bg-emerald-100 px-1.5 py-0.5 rounded">
+                                Concluído por você
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* FASE 6: BLOCO LABORATÓRIOS CREDENCIADOS NA ETAPA TOXICOLÓGICA */}
+                {(activeSelectedStage.id === 'etapa-06' || activeSelectedStage.destaqueToxico) && (
+                  <div className="bg-[#071426] text-white border border-slate-700 rounded-2xl p-5 space-y-4 shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          Exigência Legal · Portaria Detran-SP
+                        </span>
+                        <h4 className="text-sm font-extrabold text-white">
+                          Encontre um Laboratório Credenciado
+                        </h4>
+                        <p className="text-xs text-slate-300">
+                          Obrigatório com resultado negativo para processos abertos a partir de 17/06/2026. Validade de 90 dias a contar da coleta.
+                        </p>
+                      </div>
+
+                      <a
+                        href="https://servicos.sp.gov.br/fcarta/1D5669D9-0BB1-4192-AE95-47613681F8D1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                      >
+                        <span>Fonte Oficial Detran-SP</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <span className="text-[11px] font-semibold text-slate-400 block">
+                        Laboratórios Verificados na Região (Dracena e Região — SP):
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {LABORATORIOS_TOXICOLOGICOS_INICIAIS.map(lab => (
+                          <div
+                            key={lab.id}
+                            className="bg-[#0D2038] border border-slate-700/80 rounded-xl p-3.5 space-y-2 text-xs flex flex-col justify-between"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-white text-xs">{lab.nome}</span>
+                                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/20 px-1.5 py-0.5 rounded">
+                                  Credenciado
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-300">{lab.endereco}</p>
+                              <div className="text-[10px] text-slate-400 font-mono">Telefone: {lab.telefone}</div>
+                            </div>
+
+                            <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+                              <span className="text-[10px] text-slate-400">Verificado: {lab.dataVerificacao}</span>
+                              {lab.whatsapp && (
+                                <a
+                                  href={`https://wa.me/55${lab.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Olá! Gostaria de consultar informações sobre agendamento de exame toxicológico para 1ª Habilitação.')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300"
+                                >
+                                  <MessageCircle className="w-3 h-3" />
+                                  <span>WhatsApp</span>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-slate-400 italic pt-1">
+                        * Os valores variam por clínica/laboratório credenciado. Confirme o preço, preparo e credenciamento atualizado diretamente na clínica antes da coleta.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* BÔNUS CTA NA ETAPA 15 */}
+                {activeSelectedStage.id === 'etapa-15' && (
+                  <div className="bg-gradient-to-r from-[#071426] to-[#0D2038] text-white rounded-2xl p-5 border border-amber-500/40 space-y-3 shadow-md">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Award className="w-4 h-4 text-amber-400" />
+                        Bônus Exclusivo da Vanessa Becegato
+                      </span>
+                      <span className="text-xs text-slate-400">2 Formulários Oficiais</span>
+                    </div>
+                    <h4 className="text-base font-extrabold text-white">
+                      Guia de Estudo & Formulários de Avaliação Prática Detran-SP
+                    </h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Consulte os critérios de pontuação oficiais aplicados pelos examinadores nas provas de Duas Rodas (A/ACC) e Quatro Rodas (B/C/D/E), simule faltas e memorize as faltas eliminatórias.
+                    </p>
+                    <div className="pt-1 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedStudyGuideId('mat-02');
+                          setShowStudyGuideModal(true);
+                        }}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                      >
+                        <Car className="w-4 h-4" />
+                        <span>Ver Formulário 4 Rodas (Carro B)</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedStudyGuideId('mat-01');
+                          setShowStudyGuideModal(true);
+                        }}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 border border-slate-700"
+                      >
+                        <Bike className="w-4 h-4 text-amber-400" />
+                        <span>Ver Formulário 2 Rodas (Moto A)</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Pre-requisites & Recommended Actions */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -495,6 +713,48 @@ export const StudentPortal: React.FC = () => {
                       Salvar
                     </button>
                   </div>
+                </div>
+
+                {/* Stage Action & Progression */}
+                <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    onClick={() => {
+                      const isDone = stageProgress?.status === 'confirmado_evidencia';
+                      updateProgressoEtapa(
+                        activeSelectedStage.id,
+                        isDone ? 'em_andamento' : 'confirmado_evidencia',
+                        stageProgress?.notasAluno,
+                        isDone ? undefined : 'Marcado como concluído pelo aluno no portal de estudos.'
+                      );
+                    }}
+                    className={`px-4 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-2 ${
+                      stageProgress?.status === 'confirmado_evidencia'
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-xs'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>
+                      {stageProgress?.status === 'confirmado_evidencia'
+                        ? 'Você marcou esta etapa como concluída ✓'
+                        : 'Marcar esta etapa como concluída'}
+                    </span>
+                  </button>
+
+                  {activeSelectedStage.ordem < etapas.length && (
+                    <button
+                      onClick={() => {
+                        const nextStage = etapas.find(e => e.ordem === activeSelectedStage.ordem + 1);
+                        if (nextStage) {
+                          setSelectedEtapaId(nextStage.id);
+                        }
+                      }}
+                      className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <span>Avançar para Etapa {activeSelectedStage.ordem + 1}</span>
+                      <ChevronRight className="w-4 h-4 text-amber-400" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Official Source & Links Footer */}
@@ -1000,6 +1260,122 @@ export const StudentPortal: React.FC = () => {
           </div>
         )}
 
+        {/* TAB: BÔNUS — GUIA DE ESTUDO DA AVALIAÇÃO PRÁTICA (FASE 7) */}
+        {activeTab === 'guia' && (
+          <div className="space-y-8">
+            {/* Header Banner */}
+            <div className="bg-[#071426] text-white rounded-3xl p-6 sm:p-8 space-y-3 border border-amber-500/30 shadow-md">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Bônus Educacional Exclusivo</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Bônus — Guia de estudo para o exame prático
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                Consulte os materiais de referência para conhecer os critérios de avaliação apresentados nos formulários disponibilizados e revisar os pontos que merecem atenção antes da prova.
+              </p>
+            </div>
+
+            {/* Study Guide Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {MATERIAIS_ESTUDO_INICIAIS.map(mat => {
+                const isMoto = mat.categoria === 'duas_rodas';
+
+                return (
+                  <div
+                    key={mat.id}
+                    className="bg-[#0D2038] text-white rounded-3xl border border-slate-700/80 p-6 sm:p-7 flex flex-col justify-between space-y-6 shadow-md hover:border-amber-500/50 transition-all"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                          {isMoto ? <Bike className="w-6 h-6" /> : <Car className="w-6 h-6" />}
+                        </div>
+                        <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-lg">
+                          Disponibilizado em: {mat.dataDisponibilizacao}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 block">
+                          {isMoto ? 'Material de estudo — Duas rodas (A/ACC)' : 'Material de estudo — Quatro rodas e demais categorias indicadas (B/C/D/E)'}
+                        </span>
+                        <h4 className="text-base sm:text-lg font-extrabold text-white leading-snug">
+                          {mat.titulo}
+                        </h4>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {mat.descricao}
+                        </p>
+                      </div>
+
+                      {/* Criteria Highlights */}
+                      <div className="bg-[#102139] border border-slate-700/80 rounded-2xl p-4 space-y-2 text-xs">
+                        <span className="font-bold text-slate-200 block text-[11px] uppercase tracking-wider">
+                          Estrutura de Avaliação Oficial:
+                        </span>
+                        <ul className="space-y-1.5 text-slate-300 text-xs">
+                          <li className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                            <span><strong>Faltas Eliminatórias:</strong> Reprovação imediata</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <span><strong>Faltas Graves:</strong> Perda de 3 pontos</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+                            <span><strong>Faltas Médias:</strong> Perda de 2 pontos</span>
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                            <span><strong>Faltas Leves:</strong> Perda de 1 ponto (Máximo permitido: 3 pts)</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* Legal & Source Notice */}
+                      <div className="text-[11px] text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                        <div>Fonte: <strong>{mat.fonteOficial}</strong></div>
+                        <p className="italic text-slate-400/90">
+                          Material de referência para estudo. Confirme as regras e os critérios vigentes nos canais oficiais antes do exame.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                      <button
+                        onClick={() => {
+                          setSelectedStudyGuideId(mat.id);
+                          setShowStudyGuideModal(true);
+                        }}
+                        className="flex-1 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Visualizar PDF</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setSelectedStudyGuideId(mat.id);
+                          setShowStudyGuideModal(true);
+                          setTimeout(() => window.print(), 300);
+                        }}
+                        className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 border border-slate-700"
+                        title="Imprimir ou Salvar PDF"
+                      >
+                        <Printer className="w-4 h-4 text-amber-400" />
+                        <span>Baixar PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* TAB 5: AJUDA & LGPD */}
         {activeTab === 'ajuda' && (
           <div className="max-w-3xl mx-auto space-y-8">
@@ -1028,7 +1404,7 @@ export const StudentPortal: React.FC = () => {
                       setSupportSent(false);
                       setSupportMessage('');
                     }}
-                    className="text-xs text-amber-700 font-bold underline"
+                    className="text-xs text-amber-700 font-bold underline cursor-pointer"
                   >
                     Enviar nova solicitação
                   </button>
@@ -1097,6 +1473,14 @@ export const StudentPortal: React.FC = () => {
           <ReceiptViewModal
             recibo={viewingReceipt}
             onClose={() => setViewingReceipt(null)}
+          />
+        )}
+
+        {/* Bônus Study Guide Modal */}
+        {showStudyGuideModal && (
+          <StudyGuideModal
+            initialMaterialId={selectedStudyGuideId}
+            onClose={() => setShowStudyGuideModal(false)}
           />
         )}
       </main>

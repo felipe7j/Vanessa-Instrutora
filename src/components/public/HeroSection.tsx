@@ -112,7 +112,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenInterestForm }) 
                   </div>
                   <div className="flex items-center justify-between text-slate-300">
                     <span className="text-slate-400">Instrução de Motocicleta:</span>
-                    <span className="font-semibold text-white">Yamaha Fazer 250 ABS</span>
+                    <span className="font-semibold text-white">Yamaha Fazer 150 ABS</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-300">
                     <span className="text-slate-400">Modalidade:</span>
@@ -120,7 +120,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenInterestForm }) 
                   </div>
                   <div className="flex items-center justify-between text-slate-300">
                     <span className="text-slate-400">Região de Atuação:</span>
-                    <span className="font-semibold text-white">{configuracoes.cidadeAtendimento}</span>
+                    <span className="font-semibold text-white px-2 py-0.5 rounded border border-[#e12121] bg-slate-900/60" style={{ borderColor: '#e12121' }}>{configuracoes.cidadeAtendimento}</span>
                   </div>
                 </div>
 

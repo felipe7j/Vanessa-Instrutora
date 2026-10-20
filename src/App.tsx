@@ -13,12 +13,14 @@ import { PublicFooter } from './components/public/PublicFooter';
 import { LegalModal } from './components/public/LegalModals';
 import { StudentPortal } from './components/student/StudentPortal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AuthModal } from './components/auth/AuthModal';
 import { PacotePratico } from './types';
 
 function MainApp() {
-  const { role } = useAppStore();
+  const { role, setRole } = useAppStore();
   const [selectedPackage, setSelectedPackage] = useState<PacotePratico | null>(null);
   const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | null>(null);
+  const [authModalRole, setAuthModalRole] = useState<'admin' | 'aluno' | null>(null);
 
   const handleSelectPackage = (pkg: PacotePratico) => {
     setSelectedPackage(pkg);
@@ -43,7 +45,10 @@ function MainApp() {
       {/* View routing based on active role */}
       {role === 'public' && (
         <>
-          <PublicHeader onOpenInterestModal={scrollToInterestForm} />
+          <PublicHeader
+            onOpenInterestModal={scrollToInterestForm}
+            onOpenAuthModal={(targetRole) => setAuthModalRole(targetRole)}
+          />
           <HeroSection onOpenInterestForm={scrollToInterestForm} />
           <AboutStructureSection />
           <PackagesSection onSelectPackage={handleSelectPackage} />
@@ -69,6 +74,18 @@ function MainApp() {
       {role === 'aluno' && <StudentPortal />}
 
       {role === 'admin' && <AdminDashboard />}
+
+      {/* Authentication Modal (FASE 3) */}
+      {authModalRole && (
+        <AuthModal
+          initialRole={authModalRole}
+          onClose={() => setAuthModalRole(null)}
+          onSuccess={(authenticatedRole) => {
+            setAuthModalRole(null);
+            setRole(authenticatedRole);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -5,9 +5,10 @@ import { Menu, X, MessageCircle, User, Shield, ChevronRight } from 'lucide-react
 
 interface PublicHeaderProps {
   onOpenInterestModal?: () => void;
+  onOpenAuthModal?: (role: 'admin' | 'aluno') => void;
 }
 
-export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal }) => {
+export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal, onOpenAuthModal }) => {
   const { configuracoes, setRole } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -30,6 +31,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal 
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleOpenAuth = (targetRole: 'admin' | 'aluno') => {
+    if (onOpenAuthModal) {
+      onOpenAuthModal(targetRole);
+    } else {
+      setRole(targetRole);
     }
   };
 
@@ -56,13 +65,23 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal 
           </nav>
 
           {/* Right Action CTAs */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5">
             <button
-              onClick={() => setRole('aluno')}
+              onClick={() => handleOpenAuth('aluno')}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+              title="Acessar Área do Aluno com autenticação"
             >
               <User className="w-4 h-4 text-slate-500" />
               <span>Área do Aluno</span>
+            </button>
+
+            <button
+              onClick={() => handleOpenAuth('admin')}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-900 border border-amber-300 rounded-lg bg-amber-50/80 hover:bg-amber-100 transition cursor-pointer"
+              title="Acesso Administrativo da Vanessa"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-700" />
+              <span>Gerenciamento</span>
             </button>
 
             <a
@@ -72,14 +91,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal 
               className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Falar no WhatsApp</span>
+              <span>WhatsApp</span>
             </a>
           </div>
 
           {/* Mobile Hamburger Toggle */}
           <div className="flex items-center gap-2 lg:hidden">
             <button
-              onClick={() => setRole('aluno')}
+              onClick={() => handleOpenAuth('aluno')}
               className="p-2 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg text-xs flex items-center gap-1"
               title="Área do Aluno"
             >
@@ -126,7 +145,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal 
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setRole('aluno');
+                  handleOpenAuth('aluno');
                 }}
                 className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg bg-slate-50"
               >
@@ -136,7 +155,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal 
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setRole('admin');
+                  handleOpenAuth('admin');
                 }}
                 className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold text-amber-900 border border-amber-300 rounded-lg bg-amber-50"
               >

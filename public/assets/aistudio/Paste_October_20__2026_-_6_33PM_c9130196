@@ -1,0 +1,1042 @@
+# SUPERPROMPT FINAL — AUDITORIA, SEGURANÇA E FINALIZAÇÃO DA PLATAFORMA
+# VANESSA BECEGATTO — ESTRUTURA AUTÔNOMA
+## Projeto Eco Growth | Google AI Studio + GitHub + Supabase + Vercel
+
+Assuma os papéis de arquiteto de software sênior, desenvolvedor full-stack, especialista em Supabase, segurança de aplicações, UX/UI premium, acessibilidade, LGPD e produtos digitais para profissionais autônomos.
+
+Sua missão é finalizar e aprimorar a aplicação existente Vanessa Becegatto — Estrutura Autônoma.
+
+O projeto já possui uma landing page, área do aluno, painel de gerenciamento, gestão documental e conexão com Supabase. Algumas funcionalidades já foram testadas. Portanto, NÃO comece do zero.
+
+Trabalhe como um engenheiro responsável por uma aplicação existente em fase de finalização: inspecione, preserve, corrija, aprimore e teste.
+
+O resultado deverá ser uma plataforma responsiva, segura, visualmente premium, simples para uma pessoa leiga administrar e funcional em produção.
+
+---
+
+# FASE 1 — AUDITORIA OBRIGATÓRIA ANTES DE ALTERAR O CÓDIGO
+
+Antes de implementar qualquer alteração:
+
+1. Inspecione a estrutura completa do repositório.
+2. Identifique o framework, as rotas, os componentes, os estilos e as dependências.
+3. Identifique como a autenticação está implementada.
+4. Analise as tabelas, relacionamentos, funções, políticas RLS e buckets do Supabase.
+5. Identifique os módulos já existentes de alunos, agendamentos, gestão documental, veículos e GPS da Habilitação.
+6. Identifique funcionalidades parcialmente implementadas, links quebrados, dados de demonstração e erros.
+7. Verifique quais operações são executadas no frontend e quais são validadas no backend.
+8. Verifique a configuração de produção e as variáveis de ambiente necessárias.
+9. Faça um inventário das funcionalidades existentes e classifique cada uma como funcional, parcialmente funcional, com erro ou ainda não implementada.
+
+Não exclua tabelas, não apague dados, não substitua configurações válidas e não execute migrações destrutivas.
+
+Antes de qualquer alteração estrutural, explique quais mudanças são necessárias e preserve um caminho de reversão.
+
+Implemente mudanças incrementais e compatíveis com os dados existentes.
+
+Se alguma função estiver funcionando corretamente, preserve seu comportamento.
+
+Se houver uma inconsistência entre este prompt e a estrutura real do projeto, adapte a implementação à arquitetura existente e documente a decisão.
+
+Não declare que uma funcionalidade está pronta sem executar testes verificáveis.
+
+# FASE 2 — IDENTIDADE VISUAL PREMIUM
+
+## 2.1 Objetivo visual
+
+A landing page atual está aprovada em sua estrutura geral, mas precisa de uma atualização visual para se aproximar de uma marca premium de mobilidade, direção e tecnologia.
+
+Preserve o conteúdo, a estrutura funcional e os elementos já aprovados. Atualize a aparência sem reconstruir tudo desnecessariamente.
+
+## 2.2 Paleta de cores
+
+Use como referência o logotipo oficial da Vanessa Becegatto:
+
+- Azul-marinho profundo: #071426
+- Azul-marinho secundário: #0D2038
+- Dourado principal: #D4AF62
+- Dourado claro para detalhes: #F0D79A
+- Branco suave: #F5F7FA
+- Cinza azulado: #A9B5C5
+- Fundo de cartões: #102139
+
+Esses códigos são uma proposta inicial. Se os arquivos reais da identidade visual indicarem outros tons, priorize os valores extraídos do logotipo.
+
+## 2.3 Direção de arte
+
+Desenvolva uma aparência sofisticada, moderna e marcante, com:
+
+- Fundo predominantemente escuro.
+- Contraste elevado e excelente legibilidade.
+- Dourado utilizado com moderação em botões, ícones, linhas, destaques e indicadores.
+- Tipografia contemporânea.
+- Fotografias de veículos, direção, estradas e mobilidade.
+- Efeitos sutis de profundidade.
+- Gradientes discretos.
+- Animações suaves.
+- Transições elegantes.
+- Cartões com bordas refinadas.
+- Ícones consistentes.
+- Estados visuais claros para botões, formulários, progresso e notificações.
+
+Evite excesso de dourado, brilho artificial, aparência de cassino, painéis genéricos e efeitos que dificultem a leitura.
+
+Não modifique nem redesenhe arbitrariamente o logotipo.
+
+## 2.4 Landing page
+
+Mantenha a estrutura atual e aprimore:
+
+1. Cabeçalho com logotipo, navegação e contato.
+2. Hero com título marcante, subtítulo, imagem de qualidade e chamada para ação.
+3. Apresentação da profissional e dos serviços.
+4. Como funciona a jornada de habilitação.
+5. Benefícios de aprender com acompanhamento profissional.
+6. Apresentação da área do aluno.
+7. Depoimentos apenas se forem reais, autorizados e existentes.
+8. Perguntas frequentes.
+9. Contato e localização, quando configurados.
+10. Rodapé com informações de contato, privacidade e links sociais.
+
+Título sugerido:
+
+“Sua jornada para dirigir começa com orientação e planejamento.”
+
+Subtítulo:
+
+“Organize cada etapa da habilitação e acompanhe sua evolução com o apoio de Vanessa Becegatto.”
+
+CTA principal: “Começar minha jornada”.
+
+CTA secundário: “Falar com a Vanessa”.
+
+Os textos devem ser editáveis no futuro, preferencialmente por configurações administrativas simples.
+
+## 2.5 Redes sociais e contatos
+
+Permita configurar:
+
+- Telefone.
+- WhatsApp.
+- E-mail.
+- Instagram.
+- TikTok.
+- Facebook.
+- YouTube.
+- Endereço e localização, quando aplicável.
+
+Use somente links reais fornecidos pela responsável.
+
+Não invente perfis, endereços ou telefones.
+
+Exiba apenas redes que tenham sido configuradas.
+
+Valide os links e abra páginas externas de maneira segura.
+
+O botão de WhatsApp deverá abrir uma conversa com o contato configurado e uma mensagem inicial contextualizada.
+
+Centralize essas informações em um único local administrativo para que a Vanessa possa atualizá-las sem editar o código.
+
+## 2.6 Responsividade
+
+Teste:
+- Celulares Android.
+- iPhone.
+- Tablets.
+- Notebooks.
+- Monitores desktop.
+
+A landing page deve ter navegação confortável, textos legíveis, imagens responsivas e botões acessíveis.
+
+Respeite a preferência por redução de movimento do sistema operacional e evite animações excessivas.
+
+---
+
+# FASE 3 — AUTENTICAÇÃO E CONTROLE DE ACESSO
+
+A segurança tem prioridade sobre a conveniência de uma senha fácil.
+
+## 3.1 Acesso administrativo da Vanessa
+
+Ao clicar em “Gerenciamento”, “Área administrativa” ou no botão equivalente, o visitante deverá ser encaminhado para uma tela de login.
+
+A tela deverá apresentar:
+
+- Identidade visual da Vanessa.
+- Campo de e-mail.
+- Campo de senha.
+- Botão de entrar.
+- Opção de recuperação de senha.
+- Mensagens de erro claras.
+- Indicador de carregamento.
+- Proteção contra tentativas repetidas.
+- Redirecionamento seguro após a autenticação.
+
+Utilize o Supabase Auth para autenticação real.
+
+Crie a conta administrativa da Vanessa por um processo seguro de convite, cadastro autorizado ou criação inicial controlada.
+
+Não invente o e-mail administrativo nem defina uma senha fixa dentro do código.
+
+Não crie senhas padrão compartilhadas entre instalações.
+
+Não armazene senhas em tabelas personalizadas, localStorage ou código frontend.
+
+Não coloque chaves privilegiadas do Supabase no navegador.
+
+Após o login, valide no backend se o usuário possui papel administrativo autorizado.
+
+Esconder um botão não é controle de segurança. Todas as operações administrativas deverão validar as permissões no backend e no banco de dados.
+
+Implemente recuperação de senha pelo fluxo seguro do provedor de autenticação.
+
+## 3.2 Área do aluno
+
+Cada aluno deverá ter uma conta individual.
+
+Priorize um fluxo simples de ativação por convite, link de acesso seguro enviado ao e-mail ou configuração de senha individual com recuperação.
+
+Se o projeto já tiver um fluxo de autenticação compatível, preserve-o e corrija suas falhas.
+
+Não use os quatro primeiros dígitos do CPF combinados com dia e mês de nascimento como senha definitiva.
+
+Esses dados são previsíveis e não oferecem proteção adequada.
+
+Se a Vanessa desejar uma alternativa inicial simples, implemente um convite individual de ativação, com token de uso único, validade limitada e confirmação segura de identidade.
+
+Caso o aluno não possua e-mail, apresente uma alternativa de ativação administrada pela Vanessa, com validação adequada e sem compartilhar uma senha comum.
+
+Nunca exponha CPF, data de nascimento ou outros dados pessoais em URLs, mensagens de erro ou logs.
+
+Não permita que um aluno acesse o cadastro, os documentos, os recibos ou os agendamentos de outro aluno.
+
+## 3.3 Papéis e permissões
+
+Implemente ou adapte os seguintes papéis:
+
+- Administrador da estrutura.
+- Instrutor autorizado, se aplicável.
+- Aluno.
+
+A Vanessa deverá acessar os módulos de gerenciamento autorizados.
+
+O aluno deverá acessar somente seus dados, seus documentos, seus agendamentos e os materiais disponibilizados para sua conta.
+
+Se houver mais de um instrutor ou organização no futuro, a arquitetura deverá permitir isolamento entre organizações.
+
+Não dependa exclusivamente de verificações feitas na interface.
+
+## 3.4 Segurança Supabase
+
+Audite e corrija as políticas RLS existentes.
+
+Garanta:
+- Autorização por usuário autenticado.
+- Validação do vínculo entre aluno e conta.
+- Proteção de tabelas administrativas.
+- Armazenamento privado de documentos.
+- Verificação de permissões nas operações de leitura, criação, atualização e exclusão.
+- Proteção contra acesso por alteração manual de IDs.
+- Tratamento seguro de erros.
+- Ausência de segredos no frontend.
+- Registro de eventos administrativos relevantes.
+
+Não desative a RLS para facilitar a implementação.
+
+---
+
+# FASE 4 — GPS DA HABILITAÇÃO: FUNCIONAL E INTERATIVO
+
+Este é um dos módulos mais importantes da plataforma.
+
+Preserve o layout existente em que as etapas aparecem à esquerda e o conteúdo detalhado aparece à direita.
+
+Não transforme o GPS em uma lista estática.
+
+## 4.1 Referência oficial
+
+Use como fonte primária:
+
+https://detran.sp.gov.br/cnhpaulista/
+
+Utilize também os serviços oficiais indicados em cada etapa.
+
+O GPS é uma ferramenta privada de orientação educacional. Não é um sistema oficial do Detran-SP e não possui integração oficial presumida.
+
+Não simule consultas a RENACH, exames, pagamentos, protocolos, resultados ou emissão de CNH.
+
+Todos os links oficiais devem abrir o serviço correspondente.
+
+## 4.2 Experiência do aluno
+
+Ao entrar no GPS da Habilitação, o aluno deverá visualizar:
+
+- Progresso geral.
+- Etapa atual.
+- Lista de etapas à esquerda.
+- Detalhes da etapa selecionada à direita.
+- Número e título da etapa.
+- Explicação simples.
+- Lista de tarefas.
+- Documentos necessários, quando aplicável.
+- Custo estimado ou custo informado pela fonte.
+- Link oficial.
+- Avisos importantes.
+- Botão para marcar uma tarefa como concluída.
+- Campo opcional de observações pessoais.
+- Data da última atualização das informações.
+- Botão para avançar para a próxima etapa.
+
+Preserve a navegação atual e aperfeiçoe sua funcionalidade.
+
+Ao clicar em uma etapa, o conteúdo da direita deverá ser atualizado sem recarregar desnecessariamente a aplicação.
+
+## 4.3 Estados separados
+
+Diferencie claramente:
+
+- Não iniciada.
+- Em andamento.
+- Marcada pelo aluno como concluída.
+- Aguardando documento.
+- Documento recebido.
+- Documento conferido pela estrutura.
+- Pendente de confirmação externa.
+
+Não apresente uma etapa como oficialmente concluída apenas porque o aluno clicou em “Concluir”.
+
+Use textos como:
+
+“Você marcou esta tarefa como concluída.”
+
+Não use textos como:
+
+“Detran confirmou a conclusão.”
+
+a menos que exista uma fonte oficial real e verificável para essa confirmação.
+
+## 4.4 Persistência
+
+Salve o progresso no Supabase, associado ao usuário autenticado.
+
+Se o aluno marcar uma tarefa como concluída, o estado deverá permanecer após:
+- Atualizar a página.
+- Sair e entrar novamente.
+- Trocar de dispositivo.
+- Navegar entre etapas.
+
+Utilize operações idempotentes quando apropriado para evitar duplicações.
+
+Trate falhas de rede, apresente mensagens claras e não mostre sucesso antes da confirmação do banco.
+
+O aluno deve poder revisar uma marcação equivocada, conforme as regras de cada etapa.
+
+## 4.5 Estrutura de dados
+
+Inspecione o banco existente antes de criar novas tabelas.
+
+Adapte ou crie, se necessário, estruturas equivalentes a:
+
+- habilitation_journey_templates.
+- habilitation_steps.
+- habilitation_tasks.
+- student_habilitation_progress.
+- student_habilitation_task_progress.
+- official_source_registry.
+
+O modelo deve permitir atualizar as orientações oficiais sem apagar o histórico de progresso do aluno.
+
+Associe cada orientação a uma fonte, data de revisão e versão do conteúdo.
+
+---
+
+# FASE 5 — PASSO A PASSO DA CNH PAULISTA
+
+Implemente o fluxo abaixo como estrutura inicial, com conteúdo editável e sujeito a revisão.
+
+Não hardcode taxas como se fossem permanentes.
+
+Não esconda etapas relevantes.
+
+Não considere que todos os alunos terão exatamente o mesmo fluxo, pois categorias, situação individual e mudanças regulatórias podem alterar os requisitos.
+
+## ETAPA 1 — Baixe o aplicativo CNH do Brasil
+
+Explique que o aplicativo é utilizado no processo digital de habilitação e que o aluno deverá utilizar sua própria conta.
+
+Link iOS:
+https://apps.apple.com/br/app/cnh-do-brasil/id1275057217
+
+Link Android:
+https://play.google.com/store/apps/details?id=br.gov.serpro.cnhe
+
+Custo informado na referência: gratuito.
+
+Exiba uma nota para o aluno conferir os requisitos atuais da conta gov.br diretamente nos canais oficiais.
+
+Tarefas:
+- Acessar o aplicativo.
+- Entrar com a conta pessoal.
+- Localizar a área de condutor.
+- Confirmar que consegue acessar as funcionalidades pertinentes.
+
+Não solicite nem armazene a senha gov.br do aluno.
+
+## ETAPA 2 — Inicie o requerimento da primeira habilitação
+
+Explique o caminho indicado na referência oficial:
+
+“Condutor” → “Requerimento da Primeira Habilitação”.
+
+Oriente o aluno a conferir seus dados e seguir as instruções apresentadas pelo aplicativo.
+
+Custo informado na referência: gratuito.
+
+Link de referência:
+https://detran.sp.gov.br/cnhpaulista/
+
+## ETAPA 3 — Escolha a categoria
+
+Explique as categorias pertinentes ao processo do aluno.
+
+Permita visualizar informações para:
+- Categoria A.
+- Categoria B.
+- Categoria A e B, quando aplicável.
+- ACC ou outras opções somente quando disponíveis no fluxo oficial pertinente.
+
+Não presuma que todas as opções estarão disponíveis para todos os processos.
+
+Oriente a selecionar São Paulo quando esse for o estado do processo.
+
+## ETAPA 4 — Curso teórico
+
+Explique como localizar e acompanhar o curso teórico no aplicativo CNH do Brasil.
+
+Inclua tarefas para:
+- Localizar o curso.
+- Consultar as instruções atuais.
+- Concluir as atividades exigidas.
+- Conferir a existência do certificado ou registro pertinente.
+
+Não afirme que a conclusão foi reconhecida pelo Detran sem confirmação efetiva.
+
+## ETAPA 5 — Inicie o processo no Detran-SP
+
+Link:
+https://www.detran.sp.gov.br/detransp/pb/servico/habilitacao/_iniciar_processo_primeira_habilitacao?id=carta_de_servico_iniciar_processo_primeira_habilitacao
+
+Explique que o procedimento pode envolver abertura do processo, RENACH e cadastro biométrico, conforme a orientação oficial vigente.
+
+Custo apresentado na referência fornecida: gratuito para essa etapa.
+
+Tarefas:
+- Abrir o serviço oficial.
+- Ler os requisitos atuais.
+- Realizar o procedimento exigido.
+- Registrar no GPS que o aluno concluiu a tarefa.
+- Informar eventual protocolo apenas se o próprio aluno desejar registrar essa referência.
+
+Não solicite a senha gov.br nem tente automatizar operações protegidas do portal oficial.
+
+## ETAPA 6 — Exame toxicológico
+
+Esta etapa deve possuir um aviso de destaque e ser configurável conforme as regras oficiais atuais.
+
+A referência oficial consultada informa a exigência de exame toxicológico com resultado negativo para processos de primeira habilitação iniciados a partir de 17/06/2026, incluindo as condições de validade informadas pelo Detran-SP.
+
+Fonte principal:
+https://detran.sp.gov.br/cnhpaulista/
+
+Serviço oficial:
+https://servicos.sp.gov.br/fcarta/1D5669D9-0BB1-4192-AE95-47613681F8D1
+
+Oriente o aluno a conferir:
+- Se a exigência se aplica ao seu processo.
+- Em qual momento realizar o exame.
+- Como localizar laboratório credenciado.
+- Como confirmar a validade do resultado.
+- Como proceder segundo a orientação oficial atual.
+
+Não recomende realizar o exame muito antes do momento necessário sem verificar sua validade.
+
+Não exiba preço fixo se ele variar por laboratório.
+
+Não declare o resultado como negativo nem armazene laudos sem necessidade justificada.
+
+O resultado toxicológico é dado pessoal sensível. Caso o sistema venha a armazenar documentos desse tipo, implemente controles adicionais de acesso e retenção, ou prefira manter apenas uma confirmação mínima quando juridicamente e operacionalmente adequada.
+
+## ETAPA 7 — Avaliação psicológica
+
+Explique que o candidato deverá seguir as instruções e utilizar os profissionais ou serviços credenciados conforme o processo oficial.
+
+A referência fornecida apresenta R$ 90,00 como valor da avaliação psicológica.
+
+Exiba esse valor somente como referência sujeita a confirmação, acompanhado da data da última verificação.
+
+Não permita que o aluno interprete o valor como uma garantia de preço atual em qualquer localidade ou situação.
+
+## ETAPA 8 — Exame médico
+
+Explique que o candidato deverá realizar a avaliação de aptidão física e mental conforme a orientação do Detran-SP.
+
+A referência fornecida apresenta R$ 90,00.
+
+Marque o valor como indicativo e atualizável, com link para confirmação oficial.
+
+Não colete informações médicas no GPS sem necessidade operacional e base legal adequada.
+
+## ETAPA 9 — Validação do curso teórico
+
+Inclua a validação do curso teórico quando exigida no processo do aluno.
+
+Link de referência:
+https://detran.sp.gov.br/cnhpaulista/
+
+Oriente o aluno a consultar a etapa oficial correspondente e conferir se o curso foi validado antes de prosseguir.
+
+Não presuma que a validação ocorreu.
+
+## ETAPA 10 — Pagamento e agendamento do exame teórico
+
+Link de pagamento informado na referência:
+https://pixveiculos.fazenda.sp.gov.br/
+
+Link do serviço:
+https://www.detran.sp.gov.br/detransp/pb/servico/habilitacao/agendar_ou_cancelar_exame_teorico?id=carta_de_servico_agendar_ou_cancelar_exame_teorico
+
+A referência fornecida apresenta R$ 52,83 como valor da taxa.
+
+O valor deve ser editável e apresentado com data de revisão.
+
+Inclua tarefas para:
+- Conferir as exigências.
+- Efetuar o pagamento no canal oficial.
+- Guardar o comprovante.
+- Agendar o exame.
+- Registrar a data do exame no GPS, caso o aluno deseje.
+
+Nunca peça dados de cartão ou credenciais bancárias.
+
+Não afirme que o pagamento foi confirmado pelo Detran.
+
+## ETAPA 11 — Emissão da LADV
+
+Explique a emissão da Licença de Aprendizagem de Direção Veicular no aplicativo CNH do Brasil, conforme o fluxo oficial aplicável.
+
+Inclua uma tarefa para o aluno conferir se o documento foi disponibilizado.
+
+Não inicie ou confirme aulas práticas sem considerar os requisitos legais aplicáveis.
+
+## ETAPA 12 — Aulas práticas
+
+Explique que a referência atual do Detran-SP informa uma carga horária mínima de 2 horas para as categorias A e B no contexto descrito na página, sujeita às condições regulatórias vigentes.
+
+O aluno deve verificar os requisitos do seu próprio processo.
+
+Apresente as opções de instrutor autônomo ou autoescola conforme aplicável.
+
+Se as aulas forem realizadas com instrutor autônomo, forneça o link oficial do Portal de Serviços da SENATRAN:
+
+https://portalservicos.senatran.serpro.gov.br/#/home
+
+Oriente o aluno a conferir os registros e os certificados exigidos para prosseguir.
+
+Não declare que as aulas foram registradas na SENATRAN por meio desta plataforma.
+
+## ETAPA 13 — Validação do curso prático
+
+Inclua a validação do curso prático quando exigida pelo procedimento oficial vigente.
+
+Explique que o aluno deve conferir as orientações aplicáveis ao tipo de prestador e ao seu processo.
+
+Não marque a validação como confirmada sem evidência.
+
+## ETAPA 14 — Taxa e agendamento do exame prático
+
+Link de pagamento informado:
+https://pixveiculos.fazenda.sp.gov.br/auth
+
+Link oficial do agendamento:
+https://www.detran.sp.gov.br/detransp/pb/servico/habilitacao/agendar_exame_pratico_de_direcao_veicular?id=carta_de_servico_agendar_exame_pratico_de_direcao_veicular
+
+A referência fornecida apresenta R$ 52,83 como valor indicativo da taxa.
+
+Explique que o aluno deve:
+- Conferir a taxa vigente.
+- Realizar o pagamento no canal oficial.
+- Acessar o serviço oficial.
+- Fazer a autenticação exigida diretamente no portal.
+- Selecionar categoria e local.
+- Escolher data e horário.
+- Salvar o protocolo.
+- Comparecer conforme as instruções recebidas.
+
+O sistema privado poderá guardar a data, o horário e o protocolo informados pelo aluno, se ele desejar, mas não deverá alegar que agendou o exame no Detran.
+
+## ETAPA 15 — Preparação para o exame prático
+
+Inclua um checklist de preparação baseado em fontes oficiais e no material de avaliação disponibilizado na área do aluno.
+
+Apresente:
+- Documentos necessários, conforme orientação oficial.
+- Data, horário e local do exame.
+- Verificação das instruções oficiais.
+- Condições gerais do veículo aplicáveis.
+- Orientações de segurança.
+- Materiais de revisão disponibilizados pela instrutora.
+
+Não apresente o material de estudo como garantia de aprovação.
+
+## ETAPA 16 — Exame toxicológico: conferência final
+
+Como a exigência e a validade do exame podem afetar a emissão, mantenha um lembrete final configurável.
+
+Explique que o aluno deverá conferir se a exigência se aplica ao processo e se o resultado permanece válido no momento necessário.
+
+A referência oficial informa validade de 90 dias para a utilização do resultado, conforme as condições descritas pelo Detran-SP.
+
+Não calcule automaticamente uma data definitiva de expiração sem armazenar a data de coleta corretamente e sem considerar as regras atuais.
+
+## ETAPA 17 — Emissão da CNH
+
+Explique que a emissão depende da conclusão dos requisitos e das confirmações oficiais aplicáveis.
+
+Informe que a CNH digital é disponibilizada conforme o procedimento oficial.
+
+A referência fornecida apresenta R$ 137,79 para a versão física, quando escolhida e aplicável. Exiba esse valor como referência a confirmar, nunca como preço garantido.
+
+Link de referência:
+https://detran.sp.gov.br/cnhpaulista/
+
+Finalize com uma mensagem de conclusão que não prometa emissão automática nem aproveitamento oficial de dados do GPS.
+
+## 5.5 Custos e atualizações
+
+Não espalhe valores fixos diretamente pelo código.
+
+Crie uma configuração central para:
+- Descrição da taxa.
+- Valor informado.
+- Moeda.
+- Fonte oficial.
+- Data da última revisão.
+- Estado da verificação.
+- Observações.
+- Link para confirmar o valor.
+
+Quando o valor não puder ser confirmado, mostre:
+
+“Consulte o valor atualizado no serviço oficial.”
+
+Exiba uma mensagem permanente no GPS:
+
+“Este guia é uma ferramenta privada de orientação. Procedimentos, requisitos, taxas e prazos podem mudar. Confirme as informações nos canais oficiais antes de realizar pagamentos ou agendamentos.”
+
+Inclua data da última revisão das orientações.
+
+Permita à Vanessa ou ao administrador autorizado atualizar o conteúdo sem editar o código.
+
+Não alegue que as informações são atualizadas automaticamente se não houver um mecanismo real de verificação.
+
+---
+
+# FASE 6 — LABORATÓRIOS PARA EXAME TOXICOLÓGICO
+
+Crie dentro da etapa de exame toxicológico um bloco chamado:
+
+“Encontre um laboratório credenciado”.
+
+Priorize a consulta à lista oficial da Senatran ou à página oficial indicada pelo Detran-SP.
+
+Referência oficial:
+https://servicos.sp.gov.br/fcarta/1D5669D9-0BB1-4192-AE95-47613681F8D1
+
+Implemente uma forma simples de abrir a fonte oficial para localizar laboratórios credenciados.
+
+Se houver uma fonte pública oficial que permita consulta estruturada e legalmente apropriada, avalie sua integração após confirmar a disponibilidade, os termos e o formato.
+
+Se não existir uma fonte estruturada disponível, não invente API nem faça scraping frágil de páginas protegidas.
+
+Nesse caso, forneça um botão que abra a lista oficial em nova página.
+
+Se houver um catálogo de laboratórios administrado pela Vanessa, permita cadastrar manualmente:
+- Nome.
+- Cidade.
+- Endereço.
+- Telefone.
+- WhatsApp.
+- Site.
+- Fonte da informação.
+- Data da última verificação.
+- Situação do credenciamento, quando confirmada.
+
+Não marque um laboratório como credenciado apenas porque foi cadastrado manualmente.
+
+Não invente empresas, números de telefone, WhatsApp ou preços.
+
+Não recomende uma empresa como credenciada sem evidência verificável.
+
+Os botões de contato devem usar somente os números confirmados e configurados.
+
+Deixe claro que o aluno deve confirmar o credenciamento, a disponibilidade, o preço e os procedimentos diretamente com o laboratório e na fonte oficial.
+
+---
+
+# FASE 7 — BÔNUS: GUIA DE ESTUDO DA AVALIAÇÃO PRÁTICA
+
+Foram fornecidos dois documentos PDF para serem disponibilizados aos alunos:
+
+1. Formulário de avaliação do exame prático de direção veicular — A e ACC, para duas rodas.
+2. Formulário de avaliação do exame prático de direção veicular — B, C, D e E, incluindo o documento fornecido para quatro rodas e outras categorias nele indicadas.
+
+Use os arquivos originais disponibilizados no projeto como referência. Não reconstrua ou altere silenciosamente seu conteúdo.
+
+## 7.1 Área do aluno
+
+Adicione uma seção visualmente destacada:
+
+“Bônus — Guia de estudo para o exame prático”.
+
+Texto de apresentação:
+
+“Consulte os materiais de referência para conhecer os critérios de avaliação apresentados nos formulários disponibilizados e revisar os pontos que merecem atenção antes da prova.”
+
+Disponibilize cartões distintos:
+
+- “Material de estudo — Duas rodas (A/ACC)”.
+- “Material de estudo — Quatro rodas e demais categorias indicadas (B/C/D/E)”.
+
+Cada cartão deverá apresentar:
+- Título.
+- Descrição.
+- Botão “Visualizar PDF”.
+- Botão “Baixar PDF”.
+- Aviso sobre atualização e fonte.
+- Data de disponibilização.
+
+Use o visual azul-marinho e dourado da plataforma.
+
+Os arquivos deverão ser acessados por usuários autorizados, conforme a política de acesso definida para os materiais.
+
+Se forem materiais educacionais públicos, o administrador poderá decidir disponibilizá-los a todos os alunos autenticados.
+
+## 7.2 Fidelidade ao documento
+
+Preserve os PDFs originais.
+
+Não altere pontuações, categorias, artigos, critérios ou textos do formulário fornecido.
+
+Não preencha os campos destinados ao examinador.
+
+Não insira dados reais de candidatos nos arquivos de referência.
+
+Não afirme que o documento representa necessariamente a versão normativa mais recente.
+
+Antes de apresentá-lo como referência atual, permita ao administrador registrar a fonte e a data de verificação.
+
+Se houver dúvida sobre a vigência do formulário, mostre:
+
+“Material de referência para estudo. Confirme as regras e os critérios vigentes nos canais oficiais antes do exame.”
+
+## 7.3 Guia de revisão complementar
+
+Se houver uma área de texto educativo adicional, ela deverá ser separada do formulário original.
+
+Poderá conter:
+- Checklist de preparação.
+- Lista de pontos para revisar com a instrutora.
+- Espaço para anotações pessoais.
+- Perguntas de revisão.
+- Registro da evolução individual, caso esse recurso já exista.
+
+Não afirme que o aluno será aprovado por estudar esse material.
+
+Não apresente o PDF como histórico real do exame individual do aluno.
+
+Não confunda o material de estudo com um resultado oficial, boletim individual ou formulário preenchido pelo examinador.
+
+---
+
+# FASE 8 — AGENDAMENTO DE AULAS E LEMBRETE PELO WHATSAPP
+
+No painel da Vanessa, preserve o sistema atual de agendamento e adicione uma ação simples para preparar um lembrete para o aluno.
+
+## 8.1 Botão de lembrete
+
+No detalhe de cada aula agendada, adicione um botão:
+
+“Preparar lembrete no WhatsApp”.
+
+Ao clicar, o sistema deverá:
+1. Identificar o aluno vinculado à aula.
+2. Consultar o nome do aluno.
+3. Consultar a data e o horário do agendamento.
+4. Consultar o telefone de contato cadastrado e validado.
+5. Montar a mensagem automaticamente.
+6. Exibir uma prévia para a Vanessa.
+7. Permitir ajustar a mensagem.
+8. Abrir a conversa correta do WhatsApp.
+
+Mensagem sugerida:
+
+“Olá, [nome do aluno]! Tudo bem? Aqui é a Vanessa. Passando para lembrar da sua aula prática de direção agendada para [data], às [horário]. Se precisar confirmar algum detalhe ou solicitar uma alteração, entre em contato comigo por aqui. Até lá!”
+
+Formate data e horário no padrão brasileiro.
+
+Não invente dados ausentes.
+
+Se não houver telefone válido, mostre uma mensagem solicitando a correção do cadastro.
+
+Não envie mensagens para um número diferente do cadastrado sem confirmação.
+
+## 8.2 Envio real versus mensagem preparada
+
+Na versão sem integração oficial:
+- O botão deverá abrir o WhatsApp com a mensagem preenchida.
+- A Vanessa revisará e enviará manualmente.
+- O sistema não deverá afirmar que a mensagem foi enviada automaticamente.
+
+Se futuramente houver uma integração oficial configurada:
+- Utilize o backend.
+- Armazene as credenciais de forma segura.
+- Respeite as regras do provedor.
+- Registre o identificador da mensagem.
+- Mostre o status real retornado pela integração.
+- Trate falhas e duplicidade.
+
+Não invente uma API, uma confirmação de entrega ou uma integração que não exista.
+
+## 8.3 Simplicidade para a Vanessa
+
+O fluxo deverá exigir o mínimo de cliques:
+
+“Agendamentos → Selecionar aula → Preparar lembrete → Conferir → Abrir WhatsApp”.
+
+Se já houver uma funcionalidade de lembretes, integre-a em vez de duplicá-la.
+
+---
+
+# FASE 9 — SIMPLIFICAR O PAINEL ADMINISTRATIVO
+
+A Vanessa deverá conseguir administrar o sistema sem conhecimento técnico.
+
+Preserve os módulos existentes e organize-os de forma clara.
+
+Sugestão de navegação:
+
+- Visão geral.
+- Alunos.
+- Agendamentos.
+- GPS da Habilitação.
+- Gestão documental.
+- Pagamentos e recibos.
+- Veículos.
+- Materiais de estudo.
+- Configurações do site.
+
+Cada módulo deverá ter:
+- Título claro.
+- Descrição curta.
+- Ação principal.
+- Busca e filtros quando necessários.
+- Estados vazios com instruções.
+- Mensagens de sucesso ou erro.
+- Confirmação para ações destrutivas.
+- Interface responsiva.
+
+Não exponha tabelas de banco, IDs técnicos ou logs complexos na interface cotidiana.
+
+Crie uma área de configurações que permita alterar, quando aplicável:
+- Logotipo.
+- Cores da identidade visual.
+- Textos do site.
+- Contatos.
+- Redes sociais.
+- Links oficiais.
+- Valores de referência.
+- Conteúdo do GPS.
+- Avisos de atualização.
+- Materiais de estudo.
+
+Somente administradores autorizados poderão editar essas configurações.
+
+---
+
+# FASE 10 — LGPD, PRIVACIDADE E DOCUMENTOS
+
+Audite a gestão documental existente e preserve os recursos já testados.
+
+Garanta:
+- Documentos privados.
+- Acesso por permissão.
+- Links temporários quando necessários.
+- Separação entre documentos de alunos.
+- Registro de operações relevantes.
+- Política de retenção.
+- Correção de dados.
+- Proteção contra acesso não autorizado.
+- Tratamento seguro de erros.
+- Ausência de dados pessoais em URLs e logs desnecessários.
+
+Evite armazenar dados excessivos.
+
+Não solicite senha gov.br.
+
+Não exponha CPF, data de nascimento, informações médicas ou documentos pessoais a usuários não autorizados.
+
+Se houver dados sensíveis, aplique medidas adicionais proporcionais.
+
+O sistema deverá identificar claramente quais documentos são:
+- Materiais de referência.
+- Documentos contratuais.
+- Recibos.
+- Documentos fornecidos pelo aluno.
+- Registros internos.
+- Documentos oficiais externos.
+
+Não apresente um documento produzido pela plataforma como se tivesse sido emitido pelo Detran-SP.
+
+---
+
+# FASE 11 — ACESSIBILIDADE, PERFORMANCE E QUALIDADE
+
+Faça uma revisão técnica completa.
+
+Verifique:
+- Contraste de cores.
+- Navegação por teclado.
+- Labels de campos.
+- Estados de foco.
+- Leitores de tela.
+- Textos alternativos de imagens.
+- Tamanho de botões.
+- Legibilidade em celulares.
+- Carregamento de imagens.
+- Carregamento de rotas.
+- Tratamento de erros.
+- Prevenção de consultas duplicadas.
+- Segurança de dependências.
+- Ausência de segredos em repositório público.
+- Consistência das datas e horários.
+- Formatação brasileira de moeda e datas.
+
+Não sacrifique segurança ou acessibilidade por efeitos visuais.
+
+---
+
+# FASE 12 — TESTES DE ACEITAÇÃO
+
+Antes de considerar o projeto concluído, execute testes reais no ambiente de desenvolvimento e registre os resultados.
+
+## Autenticação
+- Visitante tenta acessar gerenciamento.
+- Visitante é direcionado ao login.
+- Vanessa entra com conta autorizada.
+- Usuário sem papel administrativo não acessa o painel.
+- Recuperação de senha funciona.
+- Aluno acessa somente a própria conta.
+- Aluno A não consegue consultar documentos do aluno B.
+- Sessão encerrada bloqueia operações protegidas.
+
+## GPS da Habilitação
+- Abrir cada etapa.
+- Conferir links.
+- Marcar tarefa como concluída.
+- Atualizar a página.
+- Sair e entrar novamente.
+- Conferir persistência do progresso.
+- Reabrir uma etapa.
+- Testar uma falha de rede.
+- Conferir avisos de atualização.
+- Verificar que não há falsas confirmações oficiais.
+
+## Exame toxicológico
+- Exibir a orientação vigente.
+- Abrir a fonte oficial.
+- Mostrar a lista oficial de laboratórios ou a orientação para consultá-la.
+- Conferir que não há contatos inventados.
+- Conferir que preços variáveis não são apresentados como fixos.
+
+## PDFs de avaliação
+- Abrir o PDF de duas rodas.
+- Abrir o PDF de quatro rodas.
+- Conferir a legibilidade.
+- Conferir que os arquivos não foram alterados.
+- Conferir que estão identificados como materiais de estudo.
+- Conferir que não são confundidos com resultados oficiais individuais.
+
+## Agendamentos
+- Criar um agendamento.
+- Abrir o detalhe.
+- Gerar a mensagem.
+- Conferir nome, data e horário.
+- Abrir o WhatsApp correto.
+- Testar a ausência de telefone.
+- Confirmar que o sistema não declara envio automático sem integração.
+
+## Landing page
+- Conferir paleta e logotipo.
+- Testar todos os botões.
+- Testar as redes sociais configuradas.
+- Testar WhatsApp e e-mail.
+- Testar responsividade.
+- Verificar se há textos de demonstração ou links fictícios.
+
+## Supabase e produção
+- Confirmar RLS.
+- Confirmar armazenamento privado.
+- Confirmar variáveis de ambiente.
+- Confirmar ausência de segredos no frontend.
+- Testar operações autorizadas e não autorizadas.
+- Executar os testes de build.
+- Executar testes automatizados disponíveis.
+- Confirmar a compatibilidade com a Vercel.
+
+Não declare sucesso se o teste não foi executado.
+
+Se algo depender de credenciais ou serviços ainda não configurados, identifique a pendência.
+
+---
+
+# FASE 13 — ENTREGA FINAL E RELATÓRIO
+
+Ao terminar, apresente um relatório objetivo, contendo:
+
+1. Funcionalidades preservadas.
+2. Funcionalidades alteradas.
+3. Funcionalidades implementadas.
+4. Problemas corrigidos.
+5. Arquivos modificados.
+6. Migrações criadas.
+7. Políticas RLS verificadas ou modificadas.
+8. Variáveis de ambiente necessárias.
+9. Links oficiais utilizados.
+10. Testes executados e seus resultados.
+11. Pendências que exigem ação da Vanessa ou do desenvolvedor.
+12. Instruções de publicação na Vercel.
+13. Recomendações para testar o ambiente publicado.
+
+Não declare que o sistema está pronto para produção apenas porque o código foi gerado.
+
+Não apague dados existentes.
+
+Não invente resultados de testes.
+
+Não invente integrações oficiais.
+
+Não altere o conteúdo dos documentos fornecidos sem autorização.
+
+Prioridades finais, nesta ordem:
+
+1. Segurança e integridade dos dados.
+2. Preservação das funcionalidades existentes.
+3. Autenticação correta.
+4. GPS da Habilitação funcional.
+5. Materiais de estudo acessíveis.
+6. Lembretes práticos por WhatsApp.
+7. Identidade visual premium.
+8. Facilidade de uso.
+9. Testes e documentação.
+
+Execute o trabalho de forma incremental, verificável e compatível com o projeto existente.

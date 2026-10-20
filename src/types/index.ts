@@ -66,6 +66,12 @@ export type StatusAcompanhamento =
   | 'concluido_admin'
   | 'suspenso';
 
+export interface TarefaEtapa {
+  id: string;
+  titulo: string;
+  obrigatoria?: boolean;
+}
+
 export interface EtapaJornada {
   id: string;
   ordem: number;
@@ -75,19 +81,24 @@ export interface EtapaJornada {
   preRequisitos: string[];
   acoesRecomendadas: string[];
   documentosNecessarios: string[];
-  orgaoResponsavel: string;
+  tarefas?: TarefaEtapa[];
+  custoEstimado?: string;
   linkOficial: string;
+  linkSecundario?: { label: string; url: string };
+  orgaoResponsavel: string;
   fonteReferencia: string;
   dataUltimaRevisao: string;
   responsavelRevisao: string;
   precisaRevisao: boolean;
   dependeConfirmacaoOficial: boolean;
+  destaqueToxico?: boolean;
   observacoes: string;
 }
 
 export interface ProgressoAlunoEtapa {
   etapaId: string;
   status: StatusAcompanhamento;
+  tarefasConcluidas?: string[];
   notasAluno?: string;
   evidenciaRegistrada?: string;
   responsavelAtualizacao?: string;
@@ -296,6 +307,9 @@ export interface ConfiguracoesPlataforma {
   telefoneComercial: string;
   emailContato: string;
   instagram: string;
+  tiktok?: string;
+  facebook?: string;
+  youtube?: string;
   cidadeAtendimento: string;
   avisoLegalDetran: string;
   avisoRevisaoTexto: string;
@@ -309,3 +323,33 @@ export interface ConfiguracoesPlataforma {
   enderecoContratada?: string;
   provedorEmailConfigurado?: boolean;
 }
+
+export interface MaterialEstudo {
+  id: string;
+  titulo: string;
+  categoria: 'duas_rodas' | 'quatro_rodas' | 'legislacao' | 'checklist';
+  descricao: string;
+  versaoFormulario: string;
+  dataDisponibilizacao: string;
+  fonteOficial: string;
+  nomeArquivo: string;
+  criteriosAvaliacao: {
+    categoriaFalta: 'Eliminatória' | 'Grave' | 'Média' | 'Leve';
+    pontos: number;
+    itens: string[];
+  }[];
+}
+
+export interface LaboratorioToxicologico {
+  id: string;
+  nome: string;
+  cidade: string;
+  endereco: string;
+  telefone: string;
+  whatsapp?: string;
+  site?: string;
+  fonteInformacao: string;
+  dataVerificacao: string;
+  credenciamentoConfirmado: boolean;
+}
+
