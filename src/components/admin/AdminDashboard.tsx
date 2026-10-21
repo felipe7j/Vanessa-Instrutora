@@ -38,7 +38,10 @@ import {
   RefreshCw,
   FileCode,
   Check,
-  Info
+  Info,
+  KeyRound,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { DocumentManagementModule } from '../documents/DocumentManagementModule';
 import { StudentProfileModal } from './StudentProfileModal';
@@ -121,10 +124,23 @@ export const AdminDashboard: React.FC = () => {
   const [newAlunoNome, setNewAlunoNome] = useState('');
   const [newAlunoEmail, setNewAlunoEmail] = useState('');
   const [newAlunoTelefone, setNewAlunoTelefone] = useState('');
+  const [newAlunoCpf, setNewAlunoCpf] = useState('');
+  const [newAlunoUsuario, setNewAlunoUsuario] = useState('');
+  const [newAlunoSenha, setNewAlunoSenha] = useState('');
+  const [newAlunoConfirmSenha, setNewAlunoConfirmSenha] = useState('');
+  const [showNewAlunoSenha, setShowNewAlunoSenha] = useState(false);
+  const [alunoFormError, setAlunoFormError] = useState('');
   const [newAlunoCat, setNewAlunoCat] = useState<CategoriaCNH>('B');
   const [newAlunoPacote, setNewAlunoPacote] = useState('EVOLUÇÃO (10 Aulas)');
   const [newAlunoTotalAulas, setNewAlunoTotalAulas] = useState(10);
   const [newAlunoObs, setNewAlunoObs] = useState('');
+  const [createdStudentCredentials, setCreatedStudentCredentials] = useState<{
+    nome: string;
+    telefone: string;
+    usuario: string;
+    senha: string;
+  } | null>(null);
+  const [copiedCreds, setCopiedCreds] = useState(false);
 
   // Module 3: Interessados funnel filter
   const [leadStatusFilter, setLeadStatusFilter] = useState<LeadStatus | 'ALL'>('ALL');
@@ -212,15 +228,42 @@ export const AdminDashboard: React.FC = () => {
   const newLeads = interessados.filter(l => l.status === 'novo');
   const vehiclesInMaintenance = veiculos.filter(v => v.status === 'manutencao');
 
+  const handleGeneratePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const generated = `VB@${code}`;
+    setNewAlunoSenha(generated);
+    setNewAlunoConfirmSenha(generated);
+    setAlunoFormError('');
+  };
+
   // Handle Add Aluno
   const handleCreateAluno = (e: React.FormEvent) => {
     e.preventDefault();
+    setAlunoFormError('');
     if (!newAlunoNome.trim()) return;
 
-    addAluno({
+    if (newAlunoSenha && newAlunoSenha !== newAlunoConfirmSenha) {
+      setAlunoFormError('A confirmação de senha não coincide com a senha digitada.');
+      return;
+    }
+
+    if (newAlunoSenha && newAlunoSenha.length < 6) {
+      setAlunoFormError('A senha de acesso do aluno deve conter no mínimo 6 caracteres.');
+      return;
+    }
+
+    const finalUsuario = newAlunoUsuario.trim() || newAlunoEmail.trim() || newAlunoNome.trim().toLowerCase().replace(/\s+/g, '.');
+    const finalSenha = newAlunoSenha.trim() || undefined;
+
+    const created = addAluno({
       nome: newAlunoNome.trim(),
       email: newAlunoEmail.trim(),
       telefone: newAlunoTelefone.trim(),
+      cpf: newAlunoCpf.trim() || undefined,
       categoria: newAlunoCat,
       statusProcesso: 'em_formacao',
       etapaAtualId: 'etapa-07',
@@ -229,13 +272,29 @@ export const AdminDashboard: React.FC = () => {
       aulasRealizadas: 0,
       observacoes: newAlunoObs.trim(),
       comunicacaoWhatsapp: true,
-      comunicacaoEmail: true
+      comunicacaoEmail: Boolean(newAlunoEmail.trim()),
+      usuarioAcesso: finalUsuario,
+      senhaInicial: finalSenha
     });
 
     setShowAddAlunoModal(false);
+
+    if (finalSenha) {
+      setCreatedStudentCredentials({
+        nome: created.nome,
+        telefone: created.telefone,
+        usuario: finalUsuario,
+        senha: finalSenha
+      });
+    }
+
     setNewAlunoNome('');
     setNewAlunoEmail('');
     setNewAlunoTelefone('');
+    setNewAlunoCpf('');
+    setNewAlunoUsuario('');
+    setNewAlunoSenha('');
+    setNewAlunoConfirmSenha('');
     setNewAlunoObs('');
   };
 
@@ -813,110 +872,158 @@ export const AdminDashboard: React.FC = () => {
                             ? a.nome.toLowerCase().includes(alunoSearch.toLowerCase()) ||
                               a.telefone.includes(alunoSearch)
                             : true
-                        )
-                        .map(aluno => (
-                          <tr key={aluno.id} className="hover:bg-slate-50 transition">
-                            <td className="px-4 py-3">
-                              <button
-                                onClick={() => setSelectedStudentForProfile(aluno)}
-                                className="font-bold text-slate-900 hover:text-amber-700 text-left cursor-pointer transition block"
-                                title="Abrir Perfil e Documentos do Aluno"
-                              >
-                                {aluno.nome}
-                              </button>
-                              <span className="text-[11px] text-slate-500">Desde: {aluno.dataMatricula}</span>
-                            </td>
-                            <td className="px-4 py-3 text-slate-600">
-                              <div>{aluno.telefone}</div>
-                              <div className="text-[10px] text-slate-500">{aluno.email}</div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="px-2 py-0.5 font-bold rounded bg-slate-100 text-slate-800">
-                                {aluno.categoria}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 font-medium text-slate-800">
-                              {aluno.pacoteContratado}
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  onClick={() =>
-                                    updateAluno(aluno.id, {
-                                      aulasRealizadas: Math.max(0, aluno.aulasRealizadas - 1)
-                                    })
-                                  }
-                                  title="Diminuir aula"
-                                  className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs cursor-pointer"
-                                >
-                                  -
-                                </button>
-                                <span className="font-bold text-amber-700 text-xs px-1">
-                                  {aluno.aulasRealizadas}/{aluno.totalAulasContratadas}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    updateAluno(aluno.id, {
-                                      aulasRealizadas: Math.min(
-                                        aluno.totalAulasContratadas,
-                                        aluno.aulasRealizadas + 1
-                                      )
-                                    })
-                                  }
-                                  title="Concluir mais 1 aula"
-                                  className="w-5 h-5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs cursor-pointer"
-                                >
-                                  +
-                                </button>
+                        ).length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 px-4 text-center">
+                            <div className="flex flex-col items-center justify-center max-w-md mx-auto space-y-3">
+                              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-600">
+                                <Users className="w-6 h-6" />
                               </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                                  aluno.statusProcesso === 'em_formacao'
-                                    ? 'bg-amber-100 text-amber-900'
-                                    : aluno.statusProcesso === 'aguardando_exame'
-                                    ? 'bg-blue-100 text-blue-900'
-                                    : 'bg-slate-200 text-slate-700'
-                                }`}
-                              >
-                                {aluno.statusProcesso.replace('_', ' ').toUpperCase()}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right space-x-2">
+                              <h4 className="text-sm font-bold text-slate-800">
+                                {alunoSearch || alunoFilterCat !== 'ALL'
+                                  ? 'Nenhum aluno encontrado com os filtros selecionados'
+                                  : 'Nenhum aluno cadastrado no momento'}
+                              </h4>
+                              <p className="text-xs text-slate-500 leading-relaxed">
+                                {alunoSearch || alunoFilterCat !== 'ALL'
+                                  ? 'Tente ajustar os termos de busca ou limpar os filtros de categoria.'
+                                  : 'O sistema está pronto para seu primeiro uso oficial. Cadastre o primeiro aluno da Vanessa para iniciar o acompanhamento prático, emitir contratos e gerar os acessos ao portal.'}
+                              </p>
                               <button
-                                onClick={() => setSelectedStudentForProfile(aluno)}
-                                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs cursor-pointer transition shadow-2xs"
+                                onClick={() => setShowAddAlunoModal(true)}
+                                className="mt-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition"
                               >
-                                Perfil & Docs
+                                <UserPlus className="w-4 h-4" />
+                                <span>Cadastrar Primeiro Aluno</span>
                               </button>
-                              <button
-                                onClick={() => setStudentToArchive(aluno)}
-                                className="text-slate-400 hover:text-rose-600 cursor-pointer p-1"
-                                title="Arquivar aluno"
-                              >
-                                <Archive className="w-3.5 h-3.5 inline" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        alunos
+                          .filter(a =>
+                            alunoFilterCat === 'ALL' ? true : a.categoria === alunoFilterCat
+                          )
+                          .filter(a =>
+                            alunoSearch
+                              ? a.nome.toLowerCase().includes(alunoSearch.toLowerCase()) ||
+                                a.telefone.includes(alunoSearch)
+                              : true
+                          )
+                          .map(aluno => (
+                            <tr key={aluno.id} className="hover:bg-slate-50 transition">
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => setSelectedStudentForProfile(aluno)}
+                                  className="font-bold text-slate-900 hover:text-amber-700 text-left cursor-pointer transition block"
+                                  title="Abrir Perfil e Documentos do Aluno"
+                                >
+                                  {aluno.nome}
+                                </button>
+                                <span className="text-[11px] text-slate-500">Desde: {aluno.dataMatricula}</span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-600">
+                                <div>{aluno.telefone}</div>
+                                <div className="text-[10px] text-slate-500">{aluno.email}</div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="px-2 py-0.5 font-bold rounded bg-slate-100 text-slate-800">
+                                  {aluno.categoria}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-slate-800">
+                                {aluno.pacoteContratado}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={() =>
+                                      updateAluno(aluno.id, {
+                                        aulasRealizadas: Math.max(0, aluno.aulasRealizadas - 1)
+                                      })
+                                    }
+                                    title="Diminuir aula"
+                                    className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs cursor-pointer"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="font-bold text-amber-700 text-xs px-1">
+                                    {aluno.aulasRealizadas}/{aluno.totalAulasContratadas}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      updateAluno(aluno.id, {
+                                        aulasRealizadas: Math.min(
+                                          aluno.totalAulasContratadas,
+                                          aluno.aulasRealizadas + 1
+                                        )
+                                      })
+                                    }
+                                    title="Concluir mais 1 aula"
+                                    className="w-5 h-5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs cursor-pointer"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                                    aluno.statusProcesso === 'em_formacao'
+                                      ? 'bg-amber-100 text-amber-900'
+                                      : aluno.statusProcesso === 'aguardando_exame'
+                                      ? 'bg-blue-100 text-blue-900'
+                                      : 'bg-slate-200 text-slate-700'
+                                  }`}
+                                >
+                                  {aluno.statusProcesso.replace('_', ' ').toUpperCase()}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right space-x-2">
+                                <button
+                                  onClick={() => setSelectedStudentForProfile(aluno)}
+                                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs cursor-pointer transition shadow-2xs"
+                                >
+                                  Perfil & Docs
+                                </button>
+                                <button
+                                  onClick={() => setStudentToArchive(aluno)}
+                                  className="text-slate-400 hover:text-rose-600 cursor-pointer p-1"
+                                  title="Arquivar aluno"
+                                >
+                                  <Archive className="w-3.5 h-3.5 inline" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              {/* Add Aluno Modal */}
+              {/* Add Aluno Modal with Student Credentials */}
               {showAddAlunoModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-                  <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in overflow-y-auto">
+                  <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200 my-6">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <h4 className="text-base font-bold text-slate-900">Cadastrar Novo Aluno</h4>
+                      <div>
+                        <h4 className="text-base font-bold text-slate-900">Cadastrar Novo Aluno</h4>
+                        <p className="text-[11px] text-slate-500">Matrícula e geração de credenciais de acesso</p>
+                      </div>
                       <button onClick={() => setShowAddAlunoModal(false)} className="text-slate-400 hover:text-slate-700">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <form onSubmit={handleCreateAluno} className="space-y-3 text-xs">
+                    {alunoFormError && (
+                      <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>{alunoFormError}</span>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleCreateAluno} className="space-y-3.5 text-xs">
                       <div>
                         <label className="block font-bold text-slate-700 mb-1">Nome Completo *</label>
                         <input
@@ -924,6 +1031,7 @@ export const AdminDashboard: React.FC = () => {
                           required
                           value={newAlunoNome}
                           onChange={e => setNewAlunoNome(e.target.value)}
+                          placeholder="Ex: João da Silva"
                           className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white"
                         />
                       </div>
@@ -936,23 +1044,36 @@ export const AdminDashboard: React.FC = () => {
                             required
                             value={newAlunoTelefone}
                             onChange={e => setNewAlunoTelefone(e.target.value)}
+                            placeholder="(18) 99000-0000"
                             className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white"
                           />
                         </div>
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">E-mail</label>
+                          <label className="block font-bold text-slate-700 mb-1">CPF (Opcional)</label>
                           <input
-                            type="email"
-                            value={newAlunoEmail}
-                            onChange={e => setNewAlunoEmail(e.target.value)}
+                            type="text"
+                            value={newAlunoCpf}
+                            onChange={e => setNewAlunoCpf(e.target.value)}
+                            placeholder="000.000.000-00"
                             className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white"
                           />
                         </div>
                       </div>
 
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">E-mail do Aluno</label>
+                        <input
+                          type="email"
+                          value={newAlunoEmail}
+                          onChange={e => setNewAlunoEmail(e.target.value)}
+                          placeholder="aluno@email.com"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white"
+                        />
+                      </div>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Categoria</label>
+                          <label className="block font-bold text-slate-700 mb-1">Categoria CNH</label>
                           <select
                             value={newAlunoCat}
                             onChange={e => setNewAlunoCat(e.target.value as CategoriaCNH)}
@@ -990,13 +1111,89 @@ export const AdminDashboard: React.FC = () => {
                         </select>
                       </div>
 
+                      {/* CREDENCIAIS DE ACESSO DO ALUNO (LOGIN E SENHA) */}
+                      <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-amber-950 text-xs flex items-center gap-1.5">
+                            <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Credenciais para a Área do Aluno</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleGeneratePassword}
+                            className="text-[11px] font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-2 py-0.5 rounded-lg transition cursor-pointer"
+                          >
+                            Gerar Senha Segura
+                          </button>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            Usuário ou Login de Acesso
+                          </label>
+                          <input
+                            type="text"
+                            value={newAlunoUsuario}
+                            onChange={e => setNewAlunoUsuario(e.target.value)}
+                            placeholder={newAlunoEmail || 'Ex: joao.silva (ou e-mail)'}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-1 focus:ring-amber-500"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">
+                              Senha Inicial *
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showNewAlunoSenha ? 'text' : 'password'}
+                                value={newAlunoSenha}
+                                onChange={e => {
+                                  setNewAlunoSenha(e.target.value);
+                                  setAlunoFormError('');
+                                }}
+                                placeholder="••••••••"
+                                className="w-full px-3 py-2 pr-8 bg-white border border-slate-300 rounded-xl focus:ring-1 focus:ring-amber-500 font-mono"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowNewAlunoSenha(!showNewAlunoSenha)}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                              >
+                                {showNewAlunoSenha ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">
+                              Confirmar Senha *
+                            </label>
+                            <input
+                              type={showNewAlunoSenha ? 'text' : 'password'}
+                              value={newAlunoConfirmSenha}
+                              onChange={e => {
+                                setNewAlunoConfirmSenha(e.target.value);
+                                setAlunoFormError('');
+                              }}
+                              placeholder="••••••••"
+                              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl focus:ring-1 focus:ring-amber-500 font-mono"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-amber-800/80 leading-relaxed">
+                          O aluno utilizará este login e senha para acessar o acompanhamento individual, simulador do Detran e cronograma de aulas.
+                        </p>
+                      </div>
+
                       <div>
                         <label className="block font-bold text-slate-700 mb-1">Observações Iniciais</label>
                         <textarea
                           rows={2}
                           value={newAlunoObs}
                           onChange={e => setNewAlunoObs(e.target.value)}
-                          placeholder="Ex: Medo de rampa, histórico de reprovações anteriores, etc."
+                          placeholder="Ex: Ponto de partida, foco em baliza, etc."
                           className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white"
                         />
                       </div>
@@ -1004,19 +1201,92 @@ export const AdminDashboard: React.FC = () => {
                       <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
                         <button
                           type="button"
-                          onClick={() => setShowAddAlunoModal(false)}
-                          className="px-4 py-2 text-slate-600 font-semibold"
+                          onClick={() => {
+                            setShowAddAlunoModal(false);
+                            setAlunoFormError('');
+                          }}
+                          className="px-4 py-2 text-slate-600 font-semibold cursor-pointer"
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
-                          className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl"
+                          className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl cursor-pointer shadow-sm transition"
                         >
-                          Salvar Aluno
+                          Salvar Aluno e Gerar Acesso
                         </button>
                       </div>
                     </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Created Student Credentials Feedback Modal */}
+              {createdStudentCredentials && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-fade-in">
+                  <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-bold text-slate-900">Aluno Cadastrado com Sucesso!</h4>
+                        <p className="text-xs text-slate-500">Credenciais prontas para compartilhamento</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                      <div>
+                        <span className="text-slate-500 block text-[11px]">Aluno:</span>
+                        <strong className="text-slate-900 text-sm">{createdStudentCredentials.nome}</strong>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/80">
+                        <div>
+                          <span className="text-slate-500 block text-[11px]">Usuário / Login:</span>
+                          <code className="text-amber-800 font-mono font-bold">{createdStudentCredentials.usuario}</code>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block text-[11px]">Senha Inicial:</span>
+                          <code className="text-amber-800 font-mono font-bold">{createdStudentCredentials.senha}</code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-1 text-xs">
+                      <button
+                        onClick={() => {
+                          const msg = `Olá ${createdStudentCredentials.nome}! Sua matrícula com a Instrutora Vanessa Becegato foi realizada com sucesso.\n\nSeus dados de acesso ao Portal do Aluno são:\n• Link: ${window.location.origin}\n• Usuário: ${createdStudentCredentials.usuario}\n• Senha: ${createdStudentCredentials.senha}\n\nBons treinos rumo à sua habilitação!`;
+                          navigator.clipboard.writeText(msg);
+                          setCopiedCreds(true);
+                          setTimeout(() => setCopiedCreds(false), 2000);
+                        }}
+                        className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition"
+                      >
+                        {copiedCreds ? <Check className="w-4 h-4 text-emerald-400" /> : <Save className="w-4 h-4" />}
+                        <span>{copiedCreds ? 'Mensagem Copiada!' : 'Copiar Dados de Acesso'}</span>
+                      </button>
+
+                      {createdStudentCredentials.telefone && (
+                        <a
+                          href={`https://wa.me/55${createdStudentCredentials.telefone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                            `Olá ${createdStudentCredentials.nome}! Sua matrícula com a Instrutora Vanessa Becegato foi confirmada.\n\nSeus dados de acesso ao Portal do Aluno:\n• Link: ${window.location.origin}\n• Usuário: ${createdStudentCredentials.usuario}\n• Senha Inicial: ${createdStudentCredentials.senha}\n\nAcesse para consultar suas aulas e materiais de estudo!`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition text-center"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Enviar Dados via WhatsApp</span>
+                        </a>
+                      )}
+
+                      <button
+                        onClick={() => setCreatedStudentCredentials(null)}
+                        className="w-full py-2 text-slate-500 hover:text-slate-800 font-semibold cursor-pointer"
+                      >
+                        Concluir e Fechar
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1052,11 +1322,22 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Leads List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {interessados
-                  .filter(l => (leadStatusFilter === 'ALL' ? true : l.status === leadStatusFilter))
-                  .map(lead => {
-                    const cleanPhone = lead.telefone.replace(/\D/g, '');
+              {interessados.filter(l => (leadStatusFilter === 'ALL' ? true : l.status === leadStatusFilter)).length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-800">Nenhum interessado registrado</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Novos contatos enviados através do formulário do site oficial aparecerão automaticamente aqui para atendimento.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {interessados
+                    .filter(l => (leadStatusFilter === 'ALL' ? true : l.status === leadStatusFilter))
+                    .map(lead => {
+                      const cleanPhone = lead.telefone.replace(/\D/g, '');
                     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
                       `Olá, ${lead.nome}! Sou a Vanessa Becegato. Vi que você entrou em contato sobre ${lead.servicoInteresse}. Como posso te ajudar?`
                     )}`;
@@ -1129,7 +1410,8 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     );
                   })}
-              </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1174,8 +1456,21 @@ export const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {aulas.map(aula => (
-                        <tr key={aula.id} className="hover:bg-slate-50">
+                      {aulas.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-4 py-10 text-center">
+                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-2">
+                              <Calendar className="w-6 h-6" />
+                            </div>
+                            <div className="text-sm font-bold text-slate-800">Nenhuma aula prática agendada</div>
+                            <div className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                              Clique no botão "+ Nova Aula Prática" acima para agendar horários com verificação automática de conflito de agenda e veículo.
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        aulas.map(aula => (
+                          <tr key={aula.id} className="hover:bg-slate-50">
                           <td className="px-4 py-3 font-semibold text-slate-900">
                             <div>{aula.data}</div>
                             <div className="text-slate-500 font-mono text-[11px]">
@@ -1230,7 +1525,8 @@ export const AdminDashboard: React.FC = () => {
                             )}
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    )}
                     </tbody>
                   </table>
                 </div>
@@ -1400,54 +1696,66 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {evolucoes.map(evo => {
-                  const student = alunos.find(a => a.id === evo.alunoId);
-                  return (
-                    <div key={evo.id} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-xs">
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                        <div>
-                          <span className="text-xs text-slate-500">Aluno:</span>
-                          <h4 className="text-sm font-bold text-slate-900">{student?.nome || 'Aluno'}</h4>
-                        </div>
-                        <div className="text-xs text-slate-600">
-                          Aula do dia: <strong>{evo.dataAula}</strong> · Instrutor: <strong>{evo.instrutorNome}</strong>
-                        </div>
-                      </div>
-
-                      <div className="text-xs space-y-2">
-                        <div>
-                          <strong className="text-slate-800">Habilidades Praticadas:</strong>
-                          <div className="flex flex-wrap gap-1.5 mt-1">
-                            {evo.habilidadesPraticadas.map((h, i) => (
-                              <span key={i} className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px]">
-                                {h}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                          <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-950">
-                            <strong>Pontos Positivos:</strong> {evo.pontosFortes}
-                          </div>
-                          <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 text-amber-950">
-                            <strong>A Praticar:</strong> {evo.aspectosParaPraticar}
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                          <strong>Meta Próxima Sessão:</strong> {evo.metaProximaAula}
-                        </div>
-
-                        {evo.observacoesInternas && (
-                          <div className="bg-purple-50 p-3 rounded-xl border border-purple-200 text-purple-950 text-[11px]">
-                            <strong>🔒 Nota Interna Confidencial (Não visível ao aluno):</strong> {evo.observacoesInternas}
-                          </div>
-                        )}
-                      </div>
+                {evolucoes.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                      <BookOpen className="w-6 h-6" />
                     </div>
-                  );
-                })}
+                    <h4 className="text-sm font-bold text-slate-800">Nenhum registro pedagógico cadastrado</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Após a realização das aulas práticas, clique em "+ Novo Registro de Evolução" para registrar as competências trabalhadas e orientações para o aluno.
+                    </p>
+                  </div>
+                ) : (
+                  evolucoes.map(evo => {
+                    const student = alunos.find(a => a.id === evo.alunoId);
+                    return (
+                      <div key={evo.id} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-xs">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                          <div>
+                            <span className="text-xs text-slate-500">Aluno:</span>
+                            <h4 className="text-sm font-bold text-slate-900">{student?.nome || 'Aluno'}</h4>
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Aula do dia: <strong>{evo.dataAula}</strong> · Instrutor: <strong>{evo.instrutorNome}</strong>
+                          </div>
+                        </div>
+
+                        <div className="text-xs space-y-2">
+                          <div>
+                            <strong className="text-slate-800">Habilidades Praticadas:</strong>
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {evo.habilidadesPraticadas.map((h, i) => (
+                                <span key={i} className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px]">
+                                  {h}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-950">
+                              <strong>Pontos Positivos:</strong> {evo.pontosFortes}
+                            </div>
+                            <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 text-amber-950">
+                              <strong>A Praticar:</strong> {evo.aspectosParaPraticar}
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <strong>Meta Próxima Sessão:</strong> {evo.metaProximaAula}
+                          </div>
+
+                          {evo.observacoesInternas && (
+                            <div className="bg-purple-50 p-3 rounded-xl border border-purple-200 text-purple-950 text-[11px]">
+                              <strong>🔒 Nota Interna Confidencial (Não visível ao aluno):</strong> {evo.observacoesInternas}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               {/* New Evolution Modal */}

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { AppStoreProvider, useAppStore } from './services/store';
-import { RoleSwitcher } from './components/common/RoleSwitcher';
 import { PublicHeader } from './components/public/PublicHeader';
 import { HeroSection } from './components/public/HeroSection';
 import { AboutStructureSection } from './components/public/AboutStructureSection';
@@ -39,9 +38,6 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-amber-400 selection:text-slate-950">
-      {/* Top Demo Bar */}
-      <RoleSwitcher onOpenAuthModal={(targetRole) => setAuthModalRole(targetRole)} />
-
       {/* View routing based on active role */}
       {role === 'public' && (
         <>

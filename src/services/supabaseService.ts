@@ -87,6 +87,7 @@ export const supabaseService = {
       nome: row.nome,
       email: row.email,
       telefone: row.telefone,
+      cpf: row.cpf || undefined,
       categoria: row.categoria,
       statusProcesso: row.status_processo,
       etapaAtualId: row.etapa_atual_id,
@@ -96,7 +97,9 @@ export const supabaseService = {
       aulasRealizadas: row.aulas_realizadas,
       observacoes: row.observacoes || undefined,
       comunicacaoWhatsapp: row.comunicacao_whatsapp,
-      comunicacaoEmail: row.comunicacao_email
+      comunicacaoEmail: row.comunicacao_email,
+      usuarioAcesso: row.usuario_acesso || undefined,
+      senhaInicial: row.senha_inicial || undefined
     }));
   },
 
@@ -107,6 +110,7 @@ export const supabaseService = {
       nome: aluno.nome,
       email: aluno.email,
       telefone: aluno.telefone,
+      cpf: aluno.cpf || null,
       categoria: aluno.categoria,
       status_processo: aluno.statusProcesso,
       etapa_atual_id: aluno.etapaAtualId,
@@ -116,7 +120,9 @@ export const supabaseService = {
       aulas_realizadas: aluno.aulasRealizadas,
       observacoes: aluno.observacoes || null,
       comunicacao_whatsapp: aluno.comunicacaoWhatsapp,
-      comunicacao_email: aluno.comunicacaoEmail
+      comunicacao_email: aluno.comunicacaoEmail,
+      usuario_acesso: aluno.usuarioAcesso || null,
+      senha_inicial: aluno.senhaInicial || null
     });
     return !error;
   },

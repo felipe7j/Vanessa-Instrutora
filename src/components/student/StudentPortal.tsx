@@ -52,8 +52,26 @@ export const StudentPortal: React.FC = () => {
 
   const aluno = alunos.find(a => a.id === currentAlunoId) || alunos[0];
   const [activeTab, setActiveTab] = useState<'jornada' | 'agenda' | 'evolucao' | 'documentos' | 'guia' | 'ajuda'>('jornada');
-  const [selectedEtapaId, setSelectedEtapaId] = useState<string>(aluno.etapaAtualId || 'etapa-07');
+  const [selectedEtapaId, setSelectedEtapaId] = useState<string>(aluno?.etapaAtualId || 'etapa-07');
   const [studentNotesInput, setStudentNotesInput] = useState<string>('');
+
+  if (!aluno) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center">
+        <LogoBadge size="lg" showText={false} className="mb-4" />
+        <h2 className="text-xl font-bold">Portal do Aluno</h2>
+        <p className="text-sm text-slate-400 max-w-md mt-2">
+          Nenhum cadastro de aluno ativo localizado para esta sessão. Se você é um aluno matriculado, realize o login com suas credenciais fornecidas pela instrutora Vanessa Becegato.
+        </p>
+        <button
+          onClick={() => setRole('public')}
+          className="mt-6 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer"
+        >
+          Voltar à Página Inicial
+        </button>
+      </div>
+    );
+  }
 
   // Study Guide modal state (Bônus FASE 7)
   const [showStudyGuideModal, setShowStudyGuideModal] = useState(false);

@@ -122,7 +122,38 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PREFIX + key);
     if (!raw) return fallback;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    
+    // Purge legacy mock data from previous prototypes so production starts completely clean
+    if (key === 'alunos' && Array.isArray(parsed) && parsed.some((a: any) => a?.id === 'aluno-01' || a?.email?.includes('mariana.albuquerque'))) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'aulas' && Array.isArray(parsed) && parsed.some((a: any) => a?.id === 'aula-01' || a?.alunoNome?.includes('Mariana'))) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'interessados' && Array.isArray(parsed) && parsed.some((i: any) => i?.id === 'lead-01' || i?.nome?.includes('Beatriz'))) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'contratos' && Array.isArray(parsed) && parsed.some((c: any) => c?.id === 'ctr-01' || c?.numeroContrato?.includes('CTR-2026-001'))) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'recibos' && Array.isArray(parsed) && parsed.some((r: any) => r?.id === 'rec-01' || r?.numeroRecibo?.includes('REC-2026-001'))) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'documentos' && Array.isArray(parsed) && parsed.some((d: any) => d?.id === 'doc-01')) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    if (key === 'evolucoes' && Array.isArray(parsed) && parsed.some((e: any) => e?.id === 'evo-01')) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + key);
+      return fallback;
+    }
+    return parsed;
   } catch {
     return fallback;
   }
@@ -140,7 +171,7 @@ const AppStoreContext = createContext<AppStoreContextType | null>(null);
 
 export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRoleState] = useState<UserRole>(() => loadFromStorage<UserRole>('role', 'public'));
-  const [currentAlunoId, setCurrentAlunoIdState] = useState<string>(() => loadFromStorage<string>('current_aluno_id', 'aluno-01'));
+  const [currentAlunoId, setCurrentAlunoIdState] = useState<string>(() => loadFromStorage<string>('current_aluno_id', ''));
   const [configuracoes, setConfiguracoesState] = useState<ConfiguracoesPlataforma>(() => loadFromStorage('configs', CONFIGURACOES_INICIAIS));
   const [pacotes] = useState<PacotePratico[]>(PACOTES_PRATICOS);
   const [alunos, setAlunosState] = useState<Aluno[]>(() => loadFromStorage('alunos', ALUNOS_INICIAIS));
@@ -177,23 +208,23 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setConfiguracoesState(remoteCfg);
             saveToStorage('configs', remoteCfg);
           }
-          if (remoteAlunos && remoteAlunos.length > 0) {
+          if (remoteAlunos !== null) {
             setAlunosState(remoteAlunos);
             saveToStorage('alunos', remoteAlunos);
           }
-          if (remoteVeics && remoteVeics.length > 0) {
+          if (remoteVeics !== null && remoteVeics.length > 0) {
             setVeiculosState(remoteVeics);
             saveToStorage('veiculos', remoteVeics);
           }
-          if (remoteCts && remoteCts.length > 0) {
+          if (remoteCts !== null) {
             setContratosState(remoteCts);
             saveToStorage('contratos', remoteCts);
           }
-          if (remoteRecs && remoteRecs.length > 0) {
+          if (remoteRecs !== null) {
             setRecibosState(remoteRecs);
             saveToStorage('recibos', remoteRecs);
           }
-          if (remoteGaleria && remoteGaleria.length > 0) {
+          if (remoteGaleria !== null && remoteGaleria.length > 0) {
             setGaleriaState(remoteGaleria);
             saveToStorage('galeria', remoteGaleria);
           }
@@ -253,13 +284,29 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       saveToStorage('alunos', updated);
       return updated;
     });
+    if (isSupabaseConfigured()) {
+      supabaseService.upsertAluno(novoAluno).catch(err => {
+        console.warn('Erro ao sincronizar novo aluno com Supabase:', err);
+      });
+    }
     addLogAuditoria('CADASTRO_ALUNO', 'Alunos', `Novo aluno cadastrado: ${novoAluno.nome}`);
     return novoAluno;
   }, [addLogAuditoria]);
 
   const updateAluno = useCallback((id: string, updates: Partial<Aluno>) => {
     setAlunosState(prev => {
-      const updated = prev.map(a => (a.id === id ? { ...a, ...updates } : a));
+      const updated = prev.map(a => {
+        if (a.id === id) {
+          const merged = { ...a, ...updates };
+          if (isSupabaseConfigured()) {
+            supabaseService.upsertAluno(merged).catch(err => {
+              console.warn('Erro ao sincronizar atualização de aluno com Supabase:', err);
+            });
+          }
+          return merged;
+        }
+        return a;
+      });
       saveToStorage('alunos', updated);
       return updated;
     });
@@ -717,7 +764,7 @@ export const AppStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const resetToDefaultData = useCallback(() => {
     localStorage.clear();
     setRoleState('public');
-    setCurrentAlunoIdState('aluno-01');
+    setCurrentAlunoIdState('');
     setConfiguracoesState(CONFIGURACOES_INICIAIS);
     setAlunosState(ALUNOS_INICIAIS);
     setInteressadosState(INTERESSADOS_INICIAIS);

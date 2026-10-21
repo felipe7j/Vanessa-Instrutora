@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS public.alunos (
   nome TEXT NOT NULL,
   email TEXT NOT NULL,
   telefone TEXT NOT NULL,
+  cpf TEXT,
   categoria TEXT NOT NULL CHECK (categoria IN ('A', 'B', 'AB')),
   status_processo TEXT NOT NULL CHECK (status_processo IN ('em_formacao', 'aguardando_exame', 'concluido', 'suspenso')),
   etapa_atual_id TEXT REFERENCES public.etapas_jornada(id) ON DELETE SET NULL,
@@ -118,6 +119,8 @@ CREATE TABLE IF NOT EXISTS public.alunos (
   observacoes TEXT,
   comunicacao_whatsapp BOOLEAN DEFAULT true,
   comunicacao_email BOOLEAN DEFAULT true,
+  usuario_acesso TEXT,
+  senha_inicial TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

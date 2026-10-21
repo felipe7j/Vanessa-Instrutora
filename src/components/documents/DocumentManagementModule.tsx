@@ -402,67 +402,88 @@ export const DocumentManagementModule: React.FC = () => {
                         ? c.alunoNome.toLowerCase().includes(contractSearch.toLowerCase()) ||
                           c.numeroContrato.toLowerCase().includes(contractSearch.toLowerCase())
                         : true
-                    )
-                    .map(contrato => (
-                      <tr key={contrato.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 font-mono font-bold text-slate-900">
-                          {contrato.numeroContrato}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="font-bold text-slate-900 block">{contrato.alunoNome}</span>
-                          <span className="text-[11px] text-slate-500">{contrato.alunoTelefone}</span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-700">
-                          <div>{contrato.pacoteNome}</div>
-                          <span className="text-[10px] text-slate-500">Cat. {contrato.categoria} · {contrato.quantidadeAulas} aulas</span>
-                        </td>
-                        <td className="px-4 py-3 font-bold text-slate-900">
-                          R$ {contrato.valorTotal.toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 text-slate-500 font-mono">
-                          v{contrato.versaoModelo}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                              contrato.status === 'aceito_eletronicamente'
-                                ? 'bg-emerald-100 text-emerald-900'
-                                : contrato.status === 'assinado'
-                                ? 'bg-blue-100 text-blue-900'
-                                : contrato.status === 'cancelado'
-                                ? 'bg-rose-100 text-rose-900'
-                                : 'bg-amber-100 text-amber-900'
-                            }`}
-                          >
-                            {contrato.status.replace('_', ' ').toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right space-x-2">
-                          <button
-                            onClick={() => setViewingContract(contrato)}
-                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold cursor-pointer"
-                          >
-                            Ver / Imprimir
-                          </button>
-                          {contrato.status !== 'cancelado' && (
-                            <button
-                              onClick={() => {
-                                setCancelingDoc({
-                                  type: 'contrato',
-                                  id: contrato.id,
-                                  numero: contrato.numeroContrato
-                                });
-                                setCancelReasonInput('');
-                              }}
-                              className="text-slate-400 hover:text-rose-600 text-xs font-semibold cursor-pointer"
-                              title="Cancelar contrato"
+                    ).length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-2">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm font-bold text-slate-800">Nenhum contrato cadastrado</div>
+                        <div className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                          Clique em "+ Gerar Novo Contrato" para emitir contratos de prestação de serviços com cláusulas de trânsito e link para aceite eletrônico.
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    contratos
+                      .filter(c => (contractStatusFilter === 'ALL' ? true : c.status === contractStatusFilter))
+                      .filter(c =>
+                        contractSearch
+                          ? c.alunoNome.toLowerCase().includes(contractSearch.toLowerCase()) ||
+                            c.numeroContrato.toLowerCase().includes(contractSearch.toLowerCase())
+                          : true
+                      )
+                      .map(contrato => (
+                        <tr key={contrato.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 font-mono font-bold text-slate-900">
+                            {contrato.numeroContrato}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-bold text-slate-900 block">{contrato.alunoNome}</span>
+                            <span className="text-[11px] text-slate-500">{contrato.alunoTelefone}</span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-700">
+                            <div>{contrato.pacoteNome}</div>
+                            <span className="text-[10px] text-slate-500">Cat. {contrato.categoria} · {contrato.quantidadeAulas} aulas</span>
+                          </td>
+                          <td className="px-4 py-3 font-bold text-slate-900">
+                            R$ {contrato.valorTotal.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-slate-500 font-mono">
+                            v{contrato.versaoModelo}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                                contrato.status === 'aceito_eletronicamente'
+                                  ? 'bg-emerald-100 text-emerald-900'
+                                  : contrato.status === 'assinado'
+                                  ? 'bg-blue-100 text-blue-900'
+                                  : contrato.status === 'cancelado'
+                                  ? 'bg-rose-100 text-rose-900'
+                                  : 'bg-amber-100 text-amber-900'
+                              }`}
                             >
-                              Cancelar
+                              {contrato.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right space-x-2">
+                            <button
+                              onClick={() => setViewingContract(contrato)}
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold cursor-pointer"
+                            >
+                              Ver / Imprimir
                             </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                            {contrato.status !== 'cancelado' && (
+                              <button
+                                onClick={() => {
+                                  setCancelingDoc({
+                                    type: 'contrato',
+                                    id: contrato.id,
+                                    numero: contrato.numeroContrato
+                                  });
+                                  setCancelReasonInput('');
+                                }}
+                                className="text-slate-400 hover:text-rose-600 text-xs font-semibold cursor-pointer"
+                                title="Cancelar contrato"
+                              >
+                                Cancelar
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -510,64 +531,78 @@ export const DocumentManagementModule: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {recibos.map(recibo => (
-                  <tr key={recibo.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-mono font-bold text-emerald-800">
-                      {recibo.numeroRecibo}
-                    </td>
-                    <td className="px-4 py-3 font-bold text-slate-900">
-                      <div>{recibo.alunoNome}</div>
-                      {recibo.pagadorNome !== recibo.alunoNome && (
-                        <div className="text-[10px] text-slate-500">Pagador: {recibo.pagadorNome}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 max-w-xs truncate">
-                      {recibo.servicoDescricao}
-                    </td>
-                    <td className="px-4 py-3 font-black text-slate-900">
-                      R$ {recibo.valorRecebido.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-slate-700">
-                      {recibo.formaPagamento}
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">{recibo.dataPagamento}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                          recibo.status === 'emitido'
-                            ? 'bg-emerald-100 text-emerald-900'
-                            : 'bg-rose-100 text-rose-900'
-                        }`}
-                      >
-                        {recibo.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right space-x-2">
-                      <button
-                        onClick={() => setViewingReceipt(recibo)}
-                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold cursor-pointer"
-                      >
-                        Visualizar
-                      </button>
-                      {recibo.status === 'emitido' && (
-                        <button
-                          onClick={() => {
-                            setCancelingDoc({
-                              type: 'recibo',
-                              id: recibo.id,
-                              numero: recibo.numeroRecibo
-                            });
-                            setCancelReasonInput('');
-                          }}
-                          className="text-slate-400 hover:text-rose-600 text-xs font-semibold cursor-pointer"
-                          title="Cancelar recibo"
-                        >
-                          Cancelar
-                        </button>
-                      )}
+                {recibos.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-10 text-center">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-2">
+                        <Receipt className="w-6 h-6" />
+                      </div>
+                      <div className="text-sm font-bold text-slate-800">Nenhum recibo emitido</div>
+                      <div className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                        Clique em "+ Emitir Novo Recibo" para gerar comprovantes oficiais com numeração sequencial e opção de envio direto por WhatsApp ou e-mail.
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recibos.map(recibo => (
+                    <tr key={recibo.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-mono font-bold text-emerald-800">
+                        {recibo.numeroRecibo}
+                      </td>
+                      <td className="px-4 py-3 font-bold text-slate-900">
+                        <div>{recibo.alunoNome}</div>
+                        {recibo.pagadorNome !== recibo.alunoNome && (
+                          <div className="text-[10px] text-slate-500">Pagador: {recibo.pagadorNome}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 max-w-xs truncate">
+                        {recibo.servicoDescricao}
+                      </td>
+                      <td className="px-4 py-3 font-black text-slate-900">
+                        R$ {recibo.valorRecebido.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-slate-700">
+                        {recibo.formaPagamento}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500">{recibo.dataPagamento}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                            recibo.status === 'emitido'
+                              ? 'bg-emerald-100 text-emerald-900'
+                              : 'bg-rose-100 text-rose-900'
+                          }`}
+                        >
+                          {recibo.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right space-x-2">
+                        <button
+                          onClick={() => setViewingReceipt(recibo)}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-bold cursor-pointer"
+                        >
+                          Visualizar
+                        </button>
+                        {recibo.status === 'emitido' && (
+                          <button
+                            onClick={() => {
+                              setCancelingDoc({
+                                type: 'recibo',
+                                id: recibo.id,
+                                numero: recibo.numeroRecibo
+                              });
+                              setCancelReasonInput('');
+                            }}
+                            className="text-slate-400 hover:text-rose-600 text-xs font-semibold cursor-pointer"
+                            title="Cancelar recibo"
+                          >
+                            Cancelar
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -7,6 +7,7 @@ export interface Aluno {
   nome: string;
   email: string;
   telefone: string;
+  cpf?: string;
   categoria: CategoriaCNH;
   statusProcesso: 'em_formacao' | 'aguardando_exame' | 'concluido' | 'suspenso';
   etapaAtualId: string;
@@ -17,6 +18,8 @@ export interface Aluno {
   observacoes?: string;
   comunicacaoWhatsapp: boolean;
   comunicacaoEmail: boolean;
+  usuarioAcesso?: string;
+  senhaInicial?: string;
 }
 
 export type LeadStatus =
