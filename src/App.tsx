@@ -40,7 +40,7 @@ function MainApp() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-amber-400 selection:text-slate-950">
       {/* Top Demo Bar */}
-      <RoleSwitcher />
+      <RoleSwitcher onOpenAuthModal={(targetRole) => setAuthModalRole(targetRole)} />
 
       {/* View routing based on active role */}
       {role === 'public' && (
@@ -62,6 +62,7 @@ function MainApp() {
           <PublicFooter
             onOpenPrivacyModal={() => setLegalModalType('privacy')}
             onOpenTermsModal={() => setLegalModalType('terms')}
+            onOpenAuthModal={(targetRole) => setAuthModalRole(targetRole)}
           />
 
           <LegalModal

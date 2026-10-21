@@ -77,11 +77,11 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ onOpenInterestModal,
 
             <button
               onClick={() => handleOpenAuth('admin')}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-900 border border-amber-300 rounded-lg bg-amber-50/80 hover:bg-amber-100 transition cursor-pointer"
-              title="Acesso Administrativo da Vanessa"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-amber-950 border border-amber-300 rounded-lg bg-amber-400 hover:bg-amber-300 transition cursor-pointer shadow-xs"
+              title="Acesso Administrativo da Vanessa (Central Gestão)"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-700" />
-              <span>Gerenciamento</span>
+              <Shield className="w-3.5 h-3.5 text-amber-950" />
+              <span>Central Gestão</span>
             </button>
 
             <a

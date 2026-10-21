@@ -6,13 +6,23 @@ import { MessageCircle, Instagram, Phone, MapPin, ExternalLink, ShieldCheck } fr
 interface PublicFooterProps {
   onOpenPrivacyModal: () => void;
   onOpenTermsModal: () => void;
+  onOpenAuthModal?: (role: 'admin' | 'aluno') => void;
 }
 
 export const PublicFooter: React.FC<PublicFooterProps> = ({
   onOpenPrivacyModal,
-  onOpenTermsModal
+  onOpenTermsModal,
+  onOpenAuthModal
 }) => {
   const { configuracoes, setRole } = useAppStore();
+
+  const handleOpenAuth = (targetRole: 'admin' | 'aluno') => {
+    if (onOpenAuthModal) {
+      onOpenAuthModal(targetRole);
+    } else {
+      setRole(targetRole);
+    }
+  };
 
   const cleanWhatsAppNumber = configuracoes.whatsappOficial.replace(/\D/g, '');
   const whatsappUrl = `https://wa.me/${cleanWhatsAppNumber}`;
@@ -118,7 +128,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => setRole('aluno')}
+                  onClick={() => handleOpenAuth('aluno')}
                   className="text-amber-300 hover:text-amber-200 transition font-semibold cursor-pointer"
                 >
                   → Acessar Área do Aluno
@@ -126,10 +136,10 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => setRole('admin')}
+                  onClick={() => handleOpenAuth('admin')}
                   className="text-slate-400 hover:text-white transition cursor-pointer"
                 >
-                  → Central de Gestão Administrativa
+                  → Central Gestão Administrativa
                 </button>
               </li>
               <li className="pt-2 border-t border-slate-800">
